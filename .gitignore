@@ -1,0 +1,17 @@
+# Build
+/build/
+
+# Dependencies
+/vendor/
+
+# IDE
+.idea/workspace.xml
+.idea/modules.xml
+.idea/misc.xml
+.idea/gradle.xml
+.idea/compiler.xml
+.idea/shelf/
+.idea/libraries/
+.idea/.name
+.idea/*.png
+*.iml
