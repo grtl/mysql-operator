@@ -5,6 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/grtl/mysql-operator/pkg/apis/cr"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var SchemeGroupVersion = schema.GroupVersion{Group: cr.GroupName, Version: "v1"}
@@ -30,5 +31,6 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&MySQLCluster{},
 		&MySQLClusterList{},
 	)
+	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
 }
