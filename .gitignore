@@ -12,6 +12,7 @@
 .idea/compiler.xml
 .idea/shelf/
 .idea/libraries/
+.idea/dictionaries/
 .idea/.name
 .idea/*.png
 *.iml
