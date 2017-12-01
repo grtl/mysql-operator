@@ -1,11 +1,11 @@
 package v1
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/grtl/mysql-operator/pkg/apis/cr"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 var SchemeGroupVersion = schema.GroupVersion{Group: cr.GroupName, Version: "v1"}
