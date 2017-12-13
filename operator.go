@@ -10,8 +10,8 @@ import (
 
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/controller"
+	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 )
 
 var (
@@ -19,22 +19,22 @@ var (
 	master     = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 )
 
-var Clientset *versioned.Clientset;
+var Clientset *versioned.Clientset
 
 func main() {
 	flag.Parse()
 	config, err := clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
-	if (err != nil) {
+	if err != nil {
 		panic(err)
 	}
 
 	Client, err := versioned.NewForConfig(config)
-	if (err != nil) {
+	if err != nil {
 		panic(err)
 	}
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc();
+	defer cancelFunc()
 
 	clusterController := controller.ClusterController{Client}
 	go clusterController.Run(ctx)
