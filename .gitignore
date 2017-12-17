@@ -1,9 +1,6 @@
 # Build
 /build/
 
-# Dependencies
-/vendor/
-
 # IDE
 .idea/workspace.xml
 .idea/modules.xml
