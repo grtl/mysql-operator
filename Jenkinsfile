@@ -21,11 +21,6 @@ def main() {
 }
 
 def buildStages() {
-  stage('Install dependencies') {
-    sh 'go get -u github.com/golang/dep/cmd/dep'
-    sh 'dep ensure'
-  }
-
   stage('Build') {
     sh 'go build'
   }
