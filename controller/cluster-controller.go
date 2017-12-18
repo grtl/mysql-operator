@@ -19,9 +19,9 @@ func (c *ClusterController) Run(ctx context.Context) error {
 	factory := externalversions.NewSharedInformerFactory(c.Clientset, 0)
 	informer := factory.Cr().V1().MySQLClusters().Informer()
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
-		c.onAdd,
-		c.onUpdate,
-		c.onDelete,
+		AddFunc:    c.onAdd,
+		UpdateFunc: c.onUpdate,
+		DeleteFunc: c.onDelete,
 	})
 	informer.Run(ctx.Done())
 	<-ctx.Done()

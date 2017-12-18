@@ -28,7 +28,7 @@ func main() {
 		panic(err)
 	}
 
-	Client, err := versioned.NewForConfig(config)
+	clientset, err := versioned.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +36,7 @@ func main() {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.ClusterController{Client}
+	clusterController := controller.ClusterController{Clientset: clientset}
 	go clusterController.Run(ctx)
 
 	signals := make(chan os.Signal, 1)
