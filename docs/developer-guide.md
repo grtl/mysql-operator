@@ -34,7 +34,7 @@ Run the following commands in your project directory to install all dependencies
 > godep restore ./...
 ```
 
-For further development - to install all project dependencies:
+For further development - to install all new dependencies:
 ```bash
 > go get ./...
 ```
