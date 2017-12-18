@@ -1,0 +1,16 @@
+language: go
+go:
+  - 1.9.2
+
+script:
+  # Format check
+  - test -z "$(go fmt $(go list ./...))"
+  - go vet $(go list ./... | grep -v '/pkg/client/')
+  # Build
+  - go build
+  # Tests
+  - go test -run ""
+
+notifications:
+  slack:
+    secure: upd/2Bie4b+5IuRCCM5QAV/p4qVM9qYJSvW9uL7BgabA1lJJDeQ2//n0qJ4mFD85kpNyIJ0HTdFv2KB/bfNJ/14WsRqtFjtztbzENsi83YRkXqUQNJ2lug1CKRqrHNiJwAvhwE1MzI9yJbJP7jAkSacSTThtfZoQWO7m2qgcVfBWgbd9tsdbCJAEncFsGskNej4qOZFlZTAv6+6UaTPxZfEbsPR4NPoGQG+qxqH+eIrU7tUAM5equiVxSsPWKKnpSEafe30tEiIiqDjGINMghXtVfZHmjNtoFWSg560I/eHk3UcruJZDi8sEQ8LO9a1tZBe6HUERV0J0scvAai/pjcqfHPOHc0PajR25RtjOl7agjowkeP285AO8/Hq4waKjJNwuCN/UHsvr2W1lDzUF+LHggS5yngtr3KPa61taBnLtj15zDkFXKKSubL+GCbVdGG1U6ngOc0yEJRbvBBuWCIYksa3pIQla2sBdRjFgaIpzrTS6I/5eCdn9s3jzrxtYDDiUtbMSWB2nt11xV7npRbYOK3Rs28+6UV3Wg6Cd//g/klsI3wco+todZCUlMXGHLUe77780bhvdFenJ9Z44Ix14WXVo8NlQ0f9/QTOLP2/HPNRnZB8nz21TVcKkZpKTylzYA51expTvSiJ41lErHSRXV+/KCOW9za3i9CqLAmk=
