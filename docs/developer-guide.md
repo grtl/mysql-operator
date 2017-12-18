@@ -9,13 +9,6 @@ go version go1.9.2 darwin/amd64
 /Users/username/Documents/Go
 ```
 
-## Install _Dep_
-On macOS you may install the latest version via Homebrew:
-```bash
-> brew install dep
-```
-For other OS follow the [instructions](https://github.com/golang/dep#setup).
-
 ## Clone the project
 All projects in Go must exist in the `$GOPATH` 
 ```bash
@@ -24,11 +17,32 @@ All projects in Go must exist in the `$GOPATH`
 # Replace with https://github.com/grtl/mysql-operator for https
 ```
 
-## Install dependencies
-Run the following commands to install all dependencies.
+## Install _godep_
+Install the lastest version via go get:
 ```bash
-> dep ensure
+> go get github.com/tools/godep
 ```
+
+Enable vendor:
+```bash
+> export GO15VENDOREXPERIMENT=1
+```
+
+## Install dependencies
+Run the following commands in your project directory to install all dependencies:
+```bash
+> godep restore ./...
+```
+
+For further development - to install all new dependencies:
+```bash
+> go get ./...
+```
+And update the vendor system via godep:
+```bash
+> godep save ./...
+```
+
 You're ready to rock!
 
 # Regenerating _pkg/client_ code
