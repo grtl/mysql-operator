@@ -2,14 +2,5 @@
 /build/
 
 # IDE
-.idea/workspace.xml
-.idea/modules.xml
-.idea/misc.xml
-.idea/gradle.xml
-.idea/compiler.xml
-.idea/shelf/
-.idea/libraries/
-.idea/dictionaries/
-.idea/.name
-.idea/*.png
+.idea/
 *.iml
