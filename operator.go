@@ -19,8 +19,6 @@ var (
 	master     = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 )
 
-var Clientset *versioned.Clientset
-
 func main() {
 	flag.Parse()
 	config, err := clientcmd.BuildConfigFromFlags(*master, *kubeconfig)

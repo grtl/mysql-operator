@@ -8,11 +8,14 @@ import (
 	"github.com/grtl/mysql-operator/pkg/apis/cr"
 )
 
+// SchemeGroupVersion with MySQL Cluster custom resource group
 var SchemeGroupVersion = schema.GroupVersion{Group: cr.GroupName, Version: "v1"}
 
 var (
+	// SchemeBuilder with MySQL Cluster types added
 	SchemeBuilder = runtime.NewSchemeBuilder(addKnownTypes)
-	AddToScheme   = SchemeBuilder.AddToScheme
+	// AddToScheme exported for convenience
+	AddToScheme = SchemeBuilder.AddToScheme
 )
 
 // Kind takes an unqualified kind and returns back a Group qualified GroupKind

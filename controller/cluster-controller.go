@@ -11,10 +11,12 @@ import (
 	"github.com/grtl/mysql-operator/pkg/client/informers/externalversions"
 )
 
+// ClusterController observes changes on MySQLCluster custom resource and reacts to them.
 type ClusterController struct {
 	Clientset *versioned.Clientset
 }
 
+// Run starts the controller thread.
 func (c *ClusterController) Run(ctx context.Context) error {
 	factory := externalversions.NewSharedInformerFactory(c.Clientset, 0)
 	informer := factory.Cr().V1().MySQLClusters().Informer()
