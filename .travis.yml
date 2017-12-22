@@ -15,7 +15,7 @@ script:
 deploy:
   - provider: script
     skip_cleanup: true
-    script: docker/deploy.sh
+    script: sh "$TRAVIS_BUILD_DIR/docker/deploy.sh"
     on:
       branch: master
 
