@@ -34,7 +34,7 @@ func main() {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.ClusterController{Clientset: clientset}
+	clusterController := controller.NewClusterController(clientset)
 	go clusterController.Run(ctx)
 
 	signals := make(chan os.Signal, 1)
