@@ -2,7 +2,6 @@ package controller
 
 import (
 	"context"
-	"fmt"
 
 	"k8s.io/client-go/tools/cache"
 
@@ -11,14 +10,48 @@ import (
 	"github.com/grtl/mysql-operator/pkg/client/informers/externalversions"
 )
 
-// ClusterController observes changes on MySQLCluster custom resource and reacts to them.
-type ClusterController struct {
-	Clientset *versioned.Clientset
+// ClusterEventType represents type of a ClusterEvent.
+type ClusterEventType int
+
+// Available ClusterEvent types.
+const (
+	ADDED ClusterEventType = iota
+	UPDATED
+	DELETED
+)
+
+// ClusterEvent is the way to inform about events processed by the controller.
+type ClusterEvent struct {
+	Type    ClusterEventType
+	Cluster *crv1.MySQLCluster
 }
 
-// Run starts the controller thread.
-func (c *ClusterController) Run(ctx context.Context) error {
-	factory := externalversions.NewSharedInformerFactory(c.Clientset, 0)
+// ClusterController processes events on MySQLCluster resources.
+type ClusterController interface {
+	// Run starts the event listeners.
+	Run(ctx context.Context) error
+	// GetEventsChan returns the channel consisting of events processed by the controller.
+	GetEventsChan() <-chan ClusterEvent
+}
+
+// NewClusterController returns new cluster controller.
+func NewClusterController(clientset versioned.Interface) ClusterController {
+	events := make(chan ClusterEvent, clusterControllerEventsBufferSize)
+	return &clusterController{
+		clientset: clientset,
+		events:    events,
+	}
+}
+
+type clusterController struct {
+	clientset versioned.Interface
+	events    chan ClusterEvent
+}
+
+const clusterControllerEventsBufferSize = 100
+
+func (c *clusterController) Run(ctx context.Context) error {
+	factory := externalversions.NewSharedInformerFactory(c.clientset, 0)
 	informer := factory.Cr().V1().MySQLClusters().Informer()
 	informer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc:    c.onAdd,
@@ -30,17 +63,30 @@ func (c *ClusterController) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (c *ClusterController) onAdd(obj interface{}) {
-	cluster := obj.(*crv1.MySQLCluster)
-	fmt.Printf("On create %s\n", cluster.Spec.Name)
+func (c *clusterController) GetEventsChan() <-chan ClusterEvent {
+	return c.events
 }
 
-func (c *ClusterController) onUpdate(oldObj, newObj interface{}) {
-	cluster := oldObj.(*crv1.MySQLCluster)
-	fmt.Printf("On update %s\n", cluster.Spec.Name)
+func (c *clusterController) onAdd(obj interface{}) {
+	cluster := obj.(*crv1.MySQLCluster)
+	c.events <- ClusterEvent{
+		Type:    ADDED,
+		Cluster: cluster,
+	}
 }
 
-func (c *ClusterController) onDelete(obj interface{}) {
+func (c *clusterController) onUpdate(oldObj, newObj interface{}) {
+	newCluster := newObj.(*crv1.MySQLCluster)
+	c.events <- ClusterEvent{
+		Type:    UPDATED,
+		Cluster: newCluster,
+	}
+}
+
+func (c *clusterController) onDelete(obj interface{}) {
 	cluster := obj.(*crv1.MySQLCluster)
-	fmt.Printf("On delete %s\n", cluster.Spec.Name)
+	c.events <- ClusterEvent{
+		Type:    DELETED,
+		Cluster: cluster,
+	}
 }
