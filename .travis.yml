@@ -7,7 +7,7 @@ script:
   - test -z "$(go fmt $(go list ./...))"
   - go vet $(go list ./... | grep -v '/pkg/client/')
   # Tests
-  - go test -run ""
+  - go test ./...
   # Build
   - GOOS=linux GOARCH=amd64 go build -o docker/mysql-operator
   - cd docker && docker build . -t grtl/mysql-operator:latest
