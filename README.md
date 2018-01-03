@@ -16,6 +16,6 @@ Kubernetes cluster.
 ## Build yourself
 Or build it yourself
 ```sh
-> GOOS=linux GOARCH=amd64 go build -o docker/mysql-operator
-> cd docker && docker build .
+> GOOS=linux GOARCH=amd64 go build -o mysql-operator
+> docker build .
 ```
