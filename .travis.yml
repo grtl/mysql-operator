@@ -5,7 +5,11 @@ language: go
 go:
   - 1.9.2
 
+before_install:
+  - go get github.com/tools/godep
+
 install:
+  - godep restore
   - go get github.com/mattn/goveralls github.com/modocache/gover
   - .travis-scripts/install_minikube.sh
 
