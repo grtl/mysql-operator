@@ -11,13 +11,13 @@ import (
 )
 
 // ClusterEventType represents type of a ClusterEvent.
-type ClusterEventType int
+type ClusterEventType string
 
 // Available ClusterEvent types.
 const (
-	ADDED ClusterEventType = iota
-	UPDATED
-	DELETED
+	ADDED   ClusterEventType = "Added"
+	UPDATED ClusterEventType = "Updated"
+	DELETED ClusterEventType = "Deleted"
 )
 
 // ClusterEvent is the way to inform about events processed by the controller.
@@ -34,6 +34,8 @@ type ClusterController interface {
 	GetEventsChan() <-chan ClusterEvent
 }
 
+const clusterControllerEventsBufferSize = 100
+
 // NewClusterController returns new cluster controller.
 func NewClusterController(clientset versioned.Interface) ClusterController {
 	events := make(chan ClusterEvent, clusterControllerEventsBufferSize)
@@ -48,8 +50,6 @@ type clusterController struct {
 	events    chan ClusterEvent
 }
 
-const clusterControllerEventsBufferSize = 100
-
 func (c *clusterController) Run(ctx context.Context) error {
 	factory := externalversions.NewSharedInformerFactory(c.clientset, 0)
 	informer := factory.Cr().V1().MySQLClusters().Informer()
@@ -60,6 +60,7 @@ func (c *clusterController) Run(ctx context.Context) error {
 	})
 	informer.Run(ctx.Done())
 	<-ctx.Done()
+	close(c.events)
 	return ctx.Err()
 }
 

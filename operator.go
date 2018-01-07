@@ -3,14 +3,16 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/grtl/mysql-operator/controller"
+	"github.com/grtl/mysql-operator/logging"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 )
 
@@ -20,15 +22,17 @@ var (
 )
 
 func main() {
+	logrus.Info("Starting operator")
+
 	flag.Parse()
 	config, err := clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
 
 	clientset, err := versioned.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
@@ -37,12 +41,17 @@ func main() {
 	clusterController := controller.NewClusterController(clientset)
 	go clusterController.Run(ctx)
 
+	go logging.LogEvents(
+		ctx,
+		clusterController,
+	)
+
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
 	for {
 		select {
 		case s := <-signals:
-			fmt.Printf("Received signal %#v\n", s)
+			logrus.Infof("Received signal %#v", s)
 			os.Exit(0)
 		}
 	}
