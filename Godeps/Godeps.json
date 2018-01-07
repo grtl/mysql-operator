@@ -184,6 +184,11 @@
 			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
 		},
 		{
+			"ImportPath": "github.com/sirupsen/logrus",
+			"Comment": "v1.0.4",
+			"Rev": "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
+		},
+		{
 			"ImportPath": "github.com/spf13/pflag",
 			"Comment": "v1.0.0-10-g4c012f6",
 			"Rev": "4c012f6dcd9546820e378d0bdda4d8fc772cdfea"
