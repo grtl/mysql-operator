@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Kubernetes Authors.
+Copyright 2017 The MySQL Operator Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ limitations under the License.
 package v1
 
 import (
+	time "time"
+
 	cr_v1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	versioned "github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/grtl/mysql-operator/pkg/client/informers/externalversions/internalinterfaces"
@@ -27,7 +29,6 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
 	cache "k8s.io/client-go/tools/cache"
-	time "time"
 )
 
 // MySQLClusterInformer provides access to a shared informer and lister for
@@ -38,19 +39,34 @@ type MySQLClusterInformer interface {
 }
 
 type mySQLClusterInformer struct {
-	factory internalinterfaces.SharedInformerFactory
+	factory          internalinterfaces.SharedInformerFactory
+	tweakListOptions internalinterfaces.TweakListOptionsFunc
+	namespace        string
 }
 
 // NewMySQLClusterInformer constructs a new informer for MySQLCluster type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
 func NewMySQLClusterInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredMySQLClusterInformer(client, namespace, resyncPeriod, indexers, nil)
+}
+
+// NewFilteredMySQLClusterInformer constructs a new informer for MySQLCluster type.
+// Always prefer using an informer factory to get a shared informer instead of getting an independent
+// one. This reduces memory footprint and number of connections to the server.
+func NewFilteredMySQLClusterInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options meta_v1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
 				return client.CrV1().MySQLClusters(namespace).List(options)
 			},
 			WatchFunc: func(options meta_v1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
 				return client.CrV1().MySQLClusters(namespace).Watch(options)
 			},
 		},
@@ -60,12 +76,12 @@ func NewMySQLClusterInformer(client versioned.Interface, namespace string, resyn
 	)
 }
 
-func defaultMySQLClusterInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewMySQLClusterInformer(client, meta_v1.NamespaceAll, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc})
+func (f *mySQLClusterInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
+	return NewFilteredMySQLClusterInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
 func (f *mySQLClusterInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&cr_v1.MySQLCluster{}, defaultMySQLClusterInformer)
+	return f.factory.InformerFor(&cr_v1.MySQLCluster{}, f.defaultInformer)
 }
 
 func (f *mySQLClusterInformer) Lister() v1.MySQLClusterLister {

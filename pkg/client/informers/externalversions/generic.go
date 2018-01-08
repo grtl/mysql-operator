@@ -1,5 +1,5 @@
 /*
-Copyright 2017 The Kubernetes Authors.
+Copyright 2017 The MySQL Operator Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package externalversions
 
 import (
 	"fmt"
+
 	v1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
@@ -51,7 +52,7 @@ func (f *genericInformer) Lister() cache.GenericLister {
 // TODO extend this to unknown resources with a client pool
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
-	// Group=Cr, Version=V1
+	// Group=cr.mysqloperator.grtl.github.com, Version=v1
 	case v1.SchemeGroupVersion.WithResource("mysqlclusters"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Cr().V1().MySQLClusters().Informer()}, nil
 
