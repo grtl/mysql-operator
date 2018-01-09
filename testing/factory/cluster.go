@@ -9,6 +9,7 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
+// MySQLClusterFactory generates cluster with random data for testing.
 var MySQLClusterFactory = def.NewFactory(crv1.MySQLCluster{}, "",
 	def.DynamicField("ObjectMeta.Name", func(model interface{}) (interface{}, error) {
 		return fmt.Sprintf("cluster-%s", randomdata.RandStringRunes(16)), nil
