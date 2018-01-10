@@ -16,7 +16,6 @@ install:
 
 before_script:
   - sudo minikube start --vm-driver=none --kubernetes-version=$K8S_VERSION
-  - minikube update-context
 
 script:
   - .travis-scripts/format.sh
