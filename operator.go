@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/grtl/mysql-operator/controller"
@@ -31,10 +32,15 @@ func main() {
 		panic(err)
 	}
 
+	corev1_client, err := corev1.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.NewClusterController(clientset)
+	clusterController := controller.NewClusterController(clientset, corev1_client)
 	go clusterController.Run(ctx)
 
 	signals := make(chan os.Signal, 1)
