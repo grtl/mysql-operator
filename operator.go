@@ -15,6 +15,7 @@ import (
 	"github.com/grtl/mysql-operator/controller"
 	"github.com/grtl/mysql-operator/logging"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
+	v1beta2client "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
 )
 
 var (
@@ -41,10 +42,15 @@ func main() {
 		panic(err)
 	}
 
+	v1beta2_client, err := v1beta2client.NewForConfig(config)
+	if err != nil {
+		panic(err)
+	}
+
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.NewClusterController(clientset, corev1_client)
+	clusterController := controller.NewClusterController(clientset, corev1_client, v1beta2_client)
 	go clusterController.Run(ctx)
 
 	go logging.LogEvents(
