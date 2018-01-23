@@ -41,22 +41,15 @@ func createStatefulSetForCluster(cluster *crv1.MySQLCluster, k_clientset kuberne
 }
 
 func serviceForCluster(cluster *crv1.MySQLCluster) v1.Service {
-	namespace := cluster.ObjectMeta.Namespace
-
-	port := cluster.Spec.Port
-
 	return v1.Service{
-		TypeMeta: cluster.TypeMeta,
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cluster.Spec.ServiceName,
-			Namespace: namespace,
-			Labels:    cluster.ObjectMeta.Labels,
+			Name: cluster.Spec.Name,
 		},
 		Spec: v1.ServiceSpec{
 			ClusterIP: "None",
 			Ports: []v1.ServicePort{
 				v1.ServicePort{
-					Port: int32(port),
+					Port: cluster.Spec.Port,
 					TargetPort: intstr.IntOrString{
 						IntVal: MysqlPortNumber,
 						Type:   intstr.Int,
@@ -64,7 +57,7 @@ func serviceForCluster(cluster *crv1.MySQLCluster) v1.Service {
 				},
 			},
 			Selector: map[string]string{
-				"app": cluster.Spec.App,
+				"mysql-cluster": cluster.Spec.Name,
 			},
 		},
 	}
@@ -74,7 +67,7 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 	namespace := cluster.ObjectMeta.Namespace
 
 	labels := map[string]string{
-		"app": cluster.Spec.App,
+		"mysql-cluster": cluster.Spec.Name,
 	}
 
 	var replicas int32 = 1
@@ -91,7 +84,7 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 	}
 
 	container := v1.Container{
-		Name:  cluster.ObjectMeta.Name,
+		Name:  cluster.Spec.Name,
 		Image: "mysql:8",
 		Env:   envVars,
 		VolumeMounts: []v1.VolumeMount{
@@ -120,7 +113,7 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 
 	sts_spec := v1beta2.StatefulSetSpec{
 		Replicas:    &replicas,
-		ServiceName: cluster.Spec.ServiceName,
+		ServiceName: cluster.Spec.Name,
 		Selector:    &selector,
 		Template: v1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
@@ -138,9 +131,8 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 	}
 
 	return v1beta2.StatefulSet{
-		TypeMeta: cluster.TypeMeta,
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cluster.ObjectMeta.Name,
+			Name:      cluster.Spec.Name,
 			Namespace: namespace,
 		},
 		Spec: sts_spec,
