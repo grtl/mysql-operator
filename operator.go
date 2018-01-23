@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/sirupsen/logrus"
@@ -15,7 +14,7 @@ import (
 	"github.com/grtl/mysql-operator/controller"
 	"github.com/grtl/mysql-operator/logging"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
-	v1beta2client "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	"k8s.io/client-go/kubernetes"
 )
 
 var (
@@ -37,12 +36,7 @@ func main() {
 		logrus.Panic(err)
 	}
 
-	corev1_client, err := corev1.NewForConfig(config)
-	if err != nil {
-		panic(err)
-	}
-
-	v1beta2_client, err := v1beta2client.NewForConfig(config)
+	k_clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +44,7 @@ func main() {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.NewClusterController(clientset, corev1_client, v1beta2_client)
+	clusterController := controller.NewClusterController(clientset, k_clientset)
 	go clusterController.Run(ctx)
 
 	go logging.LogEvents(

@@ -8,8 +8,7 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/pkg/client/informers/externalversions"
-	v1beta2client "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -40,21 +39,19 @@ type ClusterController interface {
 const clusterControllerEventsBufferSize = 100
 
 // NewClusterController returns new cluster controller.
-func NewClusterController(clientset versioned.Interface, corev1_client corev1.CoreV1Interface, v1beta2_client v1beta2client.AppsV1beta2Interface) ClusterController {
+func NewClusterController(clientset versioned.Interface, k_clientset kubernetes.Interface) ClusterController {
 	events := make(chan ClusterEvent, clusterControllerEventsBufferSize)
 	return &clusterController{
-		clientset:      clientset,
-		corev1_client:  corev1_client,
-		v1beta2_client: v1beta2_client,
-		events:         events,
+		clientset:   clientset,
+		k_clientset: k_clientset,
+		events:      events,
 	}
 }
 
 type clusterController struct {
-	clientset      versioned.Interface
-	corev1_client  corev1.CoreV1Interface
-	v1beta2_client v1beta2client.AppsV1beta2Interface
-	events         chan ClusterEvent
+	clientset   versioned.Interface
+	k_clientset kubernetes.Interface
+	events      chan ClusterEvent
 }
 
 func (c *clusterController) Run(ctx context.Context) error {
@@ -82,7 +79,7 @@ func (c *clusterController) onAdd(obj interface{}) {
 		Cluster: cluster,
 	}
 
-	operator.AddCluster(cluster, c.corev1_client, c.v1beta2_client)
+	operator.AddCluster(cluster, c.k_clientset)
 }
 
 func (c *clusterController) onUpdate(oldObj, newObj interface{}) {

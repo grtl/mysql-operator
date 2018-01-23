@@ -7,19 +7,18 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	v1beta2client "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 const MysqlPortNumber = 3306
 
-func AddCluster(cluster *crv1.MySQLCluster, corev1_client corev1.CoreV1Interface, v1beta2_client v1beta2client.AppsV1beta2Interface) {
-	createServiceForCluster(cluster, corev1_client)
-	createStatefulSetForCluster(cluster, v1beta2_client)
+func AddCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.Interface) {
+	createServiceForCluster(cluster, k_clientset)
+	createStatefulSetForCluster(cluster, k_clientset)
 }
 
-func createServiceForCluster(cluster *crv1.MySQLCluster, corev1_client corev1.CoreV1Interface) {
-	servicesInterface := corev1_client.Services(cluster.ObjectMeta.Namespace)
+func createServiceForCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.Interface) {
+	servicesInterface := k_clientset.CoreV1().Services(cluster.ObjectMeta.Namespace)
 
 	newService := serviceForCluster(cluster)
 	_, err := servicesInterface.Create(&newService)
@@ -29,8 +28,8 @@ func createServiceForCluster(cluster *crv1.MySQLCluster, corev1_client corev1.Co
 	}
 }
 
-func createStatefulSetForCluster(cluster *crv1.MySQLCluster, v1beta2_client v1beta2client.AppsV1beta2Interface) {
-	statefulSetsInterface := v1beta2_client.StatefulSets(cluster.ObjectMeta.Namespace)
+func createStatefulSetForCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.Interface) {
+	statefulSetsInterface := k_clientset.AppsV1beta2().StatefulSets(cluster.ObjectMeta.Namespace)
 
 	newStatefulSet := statefulSetForCluster(cluster)
 
