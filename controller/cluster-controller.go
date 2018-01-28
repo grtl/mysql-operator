@@ -39,19 +39,19 @@ type ClusterController interface {
 const clusterControllerEventsBufferSize = 100
 
 // NewClusterController returns new cluster controller.
-func NewClusterController(clientset versioned.Interface, k_clientset kubernetes.Interface) ClusterController {
+func NewClusterController(clientset versioned.Interface, kClientset kubernetes.Interface) ClusterController {
 	events := make(chan ClusterEvent, clusterControllerEventsBufferSize)
 	return &clusterController{
-		clientset:   clientset,
-		k_clientset: k_clientset,
-		events:      events,
+		clientset:  clientset,
+		kClientset: kClientset,
+		events:     events,
 	}
 }
 
 type clusterController struct {
-	clientset   versioned.Interface
-	k_clientset kubernetes.Interface
-	events      chan ClusterEvent
+	clientset  versioned.Interface
+	kClientset kubernetes.Interface
+	events     chan ClusterEvent
 }
 
 func (c *clusterController) Run(ctx context.Context) error {
@@ -79,7 +79,7 @@ func (c *clusterController) onAdd(obj interface{}) {
 		Cluster: cluster,
 	}
 
-	operator.AddCluster(cluster, c.k_clientset)
+	operator.AddCluster(cluster, c.kClientset)
 }
 
 func (c *clusterController) onUpdate(oldObj, newObj interface{}) {

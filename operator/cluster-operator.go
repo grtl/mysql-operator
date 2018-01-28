@@ -6,11 +6,10 @@ import (
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 )
 
-const MysqlPortNumber = 3306
+const MySQLPortNumber = 3306
 
 func AddCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.Interface) {
 	createServiceForCluster(cluster, k_clientset)
@@ -49,11 +48,7 @@ func serviceForCluster(cluster *crv1.MySQLCluster) v1.Service {
 			ClusterIP: "None",
 			Ports: []v1.ServicePort{
 				v1.ServicePort{
-					Port: cluster.Spec.Port,
-					TargetPort: intstr.IntOrString{
-						IntVal: MysqlPortNumber,
-						Type:   intstr.Int,
-					},
+					Port: MySQLPortNumber,
 				},
 			},
 			Selector: map[string]string{
