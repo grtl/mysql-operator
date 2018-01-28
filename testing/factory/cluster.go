@@ -7,6 +7,7 @@ import (
 	"github.com/nauyey/factory/def"
 
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 // MySQLClusterFactory generates cluster with random data for testing.
@@ -19,17 +20,8 @@ var MySQLClusterFactory = def.NewFactory(crv1.MySQLCluster{}, "",
 		cluster := model.(*crv1.MySQLCluster)
 		return fmt.Sprintf("%s-name", cluster.Name), nil
 	}),
-	def.DynamicField("Spec.Port", func(model interface{}) (interface{}, error) {
-		return fmt.Sprintf("%d", randomdata.Number(1024, 49151)), nil
-	}),
-	def.DynamicField("Spec.User", func(model interface{}) (interface{}, error) {
-		return randomdata.GenerateProfile(randomdata.RandomGender).Login.Username, nil
-	}),
 	def.DynamicField("Spec.Password", func(model interface{}) (interface{}, error) {
 		return randomdata.GenerateProfile(randomdata.RandomGender).Login.Password, nil
 	}),
-	def.DynamicField("Spec.Database", func(model interface{}) (interface{}, error) {
-		cluster := model.(*crv1.MySQLCluster)
-		return fmt.Sprintf("%s-db", cluster.Spec.User), nil
-	}),
+	def.Field("Spec.Storage", resource.MustParse("1Gi")),
 )

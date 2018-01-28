@@ -11,13 +11,13 @@ import (
 
 const MySQLPortNumber = 3306
 
-func AddCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.Interface) {
-	createServiceForCluster(cluster, k_clientset)
-	createStatefulSetForCluster(cluster, k_clientset)
+func AddCluster(cluster *crv1.MySQLCluster, kClientset kubernetes.Interface) {
+	createServiceForCluster(cluster, kClientset)
+	createStatefulSetForCluster(cluster, kClientset)
 }
 
-func createServiceForCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.Interface) {
-	servicesInterface := k_clientset.CoreV1().Services(cluster.ObjectMeta.Namespace)
+func createServiceForCluster(cluster *crv1.MySQLCluster, kClientset kubernetes.Interface) {
+	servicesInterface := kClientset.CoreV1().Services(cluster.ObjectMeta.Namespace)
 
 	newService := serviceForCluster(cluster)
 	_, err := servicesInterface.Create(&newService)
@@ -27,8 +27,8 @@ func createServiceForCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.
 	}
 }
 
-func createStatefulSetForCluster(cluster *crv1.MySQLCluster, k_clientset kubernetes.Interface) {
-	statefulSetsInterface := k_clientset.AppsV1beta2().StatefulSets(cluster.ObjectMeta.Namespace)
+func createStatefulSetForCluster(cluster *crv1.MySQLCluster, kClientset kubernetes.Interface) {
+	statefulSetsInterface := kClientset.AppsV1beta2().StatefulSets(cluster.ObjectMeta.Namespace)
 
 	newStatefulSet := statefulSetForCluster(cluster)
 
@@ -106,7 +106,7 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 		},
 	}
 
-	sts_spec := v1beta2.StatefulSetSpec{
+	stsSpec := v1beta2.StatefulSetSpec{
 		Replicas:    &replicas,
 		ServiceName: cluster.Spec.Name,
 		Selector:    &selector,
@@ -130,6 +130,6 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 			Name:      cluster.Spec.Name,
 			Namespace: namespace,
 		},
-		Spec: sts_spec,
+		Spec: stsSpec,
 	}
 }

@@ -36,7 +36,7 @@ func main() {
 		logrus.Panic(err)
 	}
 
-	k_clientset, err := kubernetes.NewForConfig(config)
+	kClientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +44,7 @@ func main() {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.NewClusterController(clientset, k_clientset)
+	clusterController := controller.NewClusterController(clientset, kClientset)
 	go clusterController.Run(ctx)
 
 	go logging.LogEvents(

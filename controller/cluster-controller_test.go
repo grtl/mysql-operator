@@ -14,6 +14,7 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned/fake"
 	testfactory "github.com/grtl/mysql-operator/testing/factory"
+	kFake "k8s.io/client-go/kubernetes/fake"
 )
 
 type ClusterControllerTestSuite struct {
@@ -43,13 +44,15 @@ func (suite *ClusterControllerTestSuite) SetupTest() {
 	err := factory.Build(testfactory.MySQLClusterFactory).To(suite.cluster)
 	suite.Require().Nil(err)
 
+	kClientset := kFake.NewSimpleClientset()
+
 	// Create the clientset with fake watcher
 	clientset := fake.NewSimpleClientset(suite.cluster)
 	suite.watcher = watch.NewFake()
 	clientset.PrependWatchReactor("mysqlclusters", testclient.DefaultWatchReactor(suite.watcher, nil))
 
 	// Create the controller
-	suite.controller = NewClusterController(clientset)
+	suite.controller = NewClusterController(clientset, kClientset)
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	suite.cancelFunc = cancelFunc
