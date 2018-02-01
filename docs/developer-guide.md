@@ -10,37 +10,26 @@ $ echo "$GOPATH"
 ```
 
 ## Clone the project
-All projects in Go must exist in the `$GOPATH` 
+All projects in Go must exist in the `$GOPATH`
 ```bash
 mkdir -p "$GOPATH/src/github.com/grtl" && cd $_
 git clone git@github.com:grtl/mysql-operator.git
 # Replace with https://github.com/grtl/mysql-operator for https
 ```
 
-## Install _godep_
-Install the lastest version via go get:
+## Install _dep_
+Install the lastest version via Homebrew (MacOS):
 ```bash
-go get github.com/tools/godep
+brew install dep
 ```
-
-Enable vendor:
-```bash
-export GO15VENDOREXPERIMENT=1
-```
+or check out https://github.com/golang/dep.
 
 ## Install dependencies
-Run the following commands in your project directory to install all dependencies:
-```bash
-godep restore ./...
-```
+All dependencies are already stored in vendor folder of the repository.
 
 For further development - to install all new dependencies:
 ```bash
-go get ./...
-```
-And update the vendor system via godep:
-```bash
-godep save ./...
+dep ensure
 ```
 
 You're ready to rock!
@@ -95,14 +84,6 @@ echo >&2 " - Checking generated code"
 ```
 
 # Regenerating _pkg/client_ code
-First install kubernetes code-generator script, by running:
-
-```bash
-err="$(go get k8s.io/code-generator 2>&1)"; \
-[[ "$err" =~ "package k8s.io/code-generator: no Go files in .*" ]] \
-&& echo >&2 "Success" || echo >&2 "$err"
-```
-
 The files can be regenerated using the `hack/update-codegen.sh` (make sure
 to run it from project root directory).
 ```bash

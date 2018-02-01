@@ -4,6 +4,3 @@ mysql-operator
 # IDE
 .idea/
 *.iml
-
-# Vendor
-vendor/
