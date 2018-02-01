@@ -5,12 +5,7 @@ language: go
 go:
   - 1.9.2
 
-before_install:
-  - go get github.com/tools/godep
-
 install:
-  - godep restore
-  - 'if [[ "$(go get k8s.io/code-generator 2>&1)" =~ "package k8s.io/code-generator: no Go files in .*" ]]; then return 0; else return 1; fi'
   - go get github.com/mattn/goveralls github.com/modocache/gover
   - .travis-scripts/install-minikube.sh
 
@@ -19,7 +14,7 @@ before_script:
 
 script:
   - .travis-scripts/format.sh
-  # - hack/verify-codegen.sh # Ignore for now as client-gen does not seem to work
+  - hack/verify-codegen.sh
   - .travis-scripts/build.sh
   - .travis-scripts/unit-tests.sh
 
