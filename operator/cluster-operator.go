@@ -25,7 +25,6 @@ func createServiceForCluster(cluster *crv1.MySQLCluster, kubeClientset kubernete
 
 	newService := serviceForCluster(cluster)
 	_, err := servicesInterface.Create(&newService)
-
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		logrus.Panic(err)
 	} else if apierrors.IsAlreadyExists(err) {
@@ -39,9 +38,7 @@ func createStatefulSetForCluster(cluster *crv1.MySQLCluster, kubeClientset kuber
 	statefulSetsInterface := kubeClientset.AppsV1beta2().StatefulSets(cluster.ObjectMeta.Namespace)
 
 	newStatefulSet := statefulSetForCluster(cluster)
-
 	_, err := statefulSetsInterface.Create(&newStatefulSet)
-
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		logrus.Panic(err)
 	} else if apierrors.IsAlreadyExists(err) {
@@ -73,6 +70,18 @@ func serviceForCluster(cluster *crv1.MySQLCluster) v1.Service {
 func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 	namespace := cluster.ObjectMeta.Namespace
 
+	stsSpec := statefulSetSpecForCluster(cluster)
+
+	return v1beta2.StatefulSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      cluster.Spec.Name,
+			Namespace: namespace,
+		},
+		Spec: stsSpec,
+	}
+}
+
+func statefulSetSpecForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSetSpec {
 	labels := map[string]string{
 		"mysql-cluster": cluster.Spec.Name,
 	}
@@ -83,42 +92,11 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 		MatchLabels: labels,
 	}
 
-	envVars := []v1.EnvVar{
-		v1.EnvVar{
-			Name:  "MYSQL_ROOT_PASSWORD",
-			Value: cluster.Spec.Password,
-		},
-	}
+	container := containerForCluster(cluster)
 
-	container := v1.Container{
-		Name:  cluster.Spec.Name,
-		Image: "mysql:8",
-		Env:   envVars,
-		VolumeMounts: []v1.VolumeMount{
-			v1.VolumeMount{
-				Name:      "mysql",
-				MountPath: "/var/lib/mysql",
-			},
-		},
-	}
+	pvc := pvcForCluster(cluster)
 
-	pvc := v1.PersistentVolumeClaim{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: "mysql",
-		},
-		Spec: v1.PersistentVolumeClaimSpec{
-			AccessModes: []v1.PersistentVolumeAccessMode{
-				"ReadWriteOnce",
-			},
-			Resources: v1.ResourceRequirements{
-				Requests: v1.ResourceList{
-					"storage": cluster.Spec.Storage,
-				},
-			},
-		},
-	}
-
-	stsSpec := v1beta2.StatefulSetSpec{
+	return v1beta2.StatefulSetSpec{
 		Replicas:    &replicas,
 		ServiceName: cluster.Spec.Name,
 		Selector:    &selector,
@@ -136,12 +114,43 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 			pvc,
 		},
 	}
+}
 
-	return v1beta2.StatefulSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      cluster.Spec.Name,
-			Namespace: namespace,
+func containerForCluster(cluster *crv1.MySQLCluster) v1.Container {
+	envVars := []v1.EnvVar{
+		v1.EnvVar{
+			Name:  "MYSQL_ROOT_PASSWORD",
+			Value: cluster.Spec.Password,
 		},
-		Spec: stsSpec,
+	}
+
+	return v1.Container{
+		Name:  cluster.Spec.Name,
+		Image: "mysql:8",
+		Env:   envVars,
+		VolumeMounts: []v1.VolumeMount{
+			v1.VolumeMount{
+				Name:      "mysql",
+				MountPath: "/var/lib/mysql",
+			},
+		},
+	}
+}
+
+func pvcForCluster(cluster *crv1.MySQLCluster) v1.PersistentVolumeClaim {
+	return v1.PersistentVolumeClaim{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "mysql",
+		},
+		Spec: v1.PersistentVolumeClaimSpec{
+			AccessModes: []v1.PersistentVolumeAccessMode{
+				"ReadWriteOnce",
+			},
+			Resources: v1.ResourceRequirements{
+				Requests: v1.ResourceList{
+					"storage": cluster.Spec.Storage,
+				},
+			},
+		},
 	}
 }
