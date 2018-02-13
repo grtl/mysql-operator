@@ -9,12 +9,12 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"k8s.io/apimachinery/pkg/watch"
+	kubeFake "k8s.io/client-go/kubernetes/fake"
 	testclient "k8s.io/client-go/testing"
 
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned/fake"
 	testfactory "github.com/grtl/mysql-operator/testing/factory"
-	kFake "k8s.io/client-go/kubernetes/fake"
 )
 
 type ClusterControllerTestSuite struct {
@@ -44,7 +44,7 @@ func (suite *ClusterControllerTestSuite) SetupTest() {
 	err := factory.Build(testfactory.MySQLClusterFactory).To(suite.cluster)
 	suite.Require().Nil(err)
 
-	kClientset := kFake.NewSimpleClientset()
+	kubeClientset := kubeFake.NewSimpleClientset()
 
 	// Create the clientset with fake watcher
 	clientset := fake.NewSimpleClientset(suite.cluster)
@@ -52,7 +52,7 @@ func (suite *ClusterControllerTestSuite) SetupTest() {
 	clientset.PrependWatchReactor("mysqlclusters", testclient.DefaultWatchReactor(suite.watcher, nil))
 
 	// Create the controller
-	suite.controller = NewClusterController(clientset, kClientset)
+	suite.controller = NewClusterController(clientset, kubeClientset)
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	suite.cancelFunc = cancelFunc

@@ -1,23 +1,24 @@
 package operator
 
 import (
-	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	v1beta2 "k8s.io/api/apps/v1beta2"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
+
+	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
-const MySQLPortNumber = 3306
+const mySQLPortNumber = 3306
 
-func AddCluster(cluster *crv1.MySQLCluster, kClientset kubernetes.Interface) {
-	createServiceForCluster(cluster, kClientset)
-	createStatefulSetForCluster(cluster, kClientset)
+func AddCluster(cluster *crv1.MySQLCluster, kubeClientset kubernetes.Interface) {
+	createServiceForCluster(cluster, kubeClientset)
+	createStatefulSetForCluster(cluster, kubeClientset)
 }
 
-func createServiceForCluster(cluster *crv1.MySQLCluster, kClientset kubernetes.Interface) {
-	servicesInterface := kClientset.CoreV1().Services(cluster.ObjectMeta.Namespace)
+func createServiceForCluster(cluster *crv1.MySQLCluster, kubeClientset kubernetes.Interface) {
+	servicesInterface := kubeClientset.CoreV1().Services(cluster.ObjectMeta.Namespace)
 
 	newService := serviceForCluster(cluster)
 	_, err := servicesInterface.Create(&newService)
@@ -27,8 +28,8 @@ func createServiceForCluster(cluster *crv1.MySQLCluster, kClientset kubernetes.I
 	}
 }
 
-func createStatefulSetForCluster(cluster *crv1.MySQLCluster, kClientset kubernetes.Interface) {
-	statefulSetsInterface := kClientset.AppsV1beta2().StatefulSets(cluster.ObjectMeta.Namespace)
+func createStatefulSetForCluster(cluster *crv1.MySQLCluster, kubeClientset kubernetes.Interface) {
+	statefulSetsInterface := kubeClientset.AppsV1beta2().StatefulSets(cluster.ObjectMeta.Namespace)
 
 	newStatefulSet := statefulSetForCluster(cluster)
 
@@ -48,7 +49,7 @@ func serviceForCluster(cluster *crv1.MySQLCluster) v1.Service {
 			ClusterIP: "None",
 			Ports: []v1.ServicePort{
 				v1.ServicePort{
-					Port: MySQLPortNumber,
+					Port: mySQLPortNumber,
 				},
 			},
 			Selector: map[string]string{
