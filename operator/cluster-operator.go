@@ -7,11 +7,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 
+	"github.com/sirupsen/logrus"
+
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
 const mySQLPortNumber = 3306
 
+// AddCluster creates the Kubernetes API objects necessary for a MySQL cluster.
 func AddCluster(cluster *crv1.MySQLCluster, kubeClientset kubernetes.Interface) {
 	createServiceForCluster(cluster, kubeClientset)
 	createStatefulSetForCluster(cluster, kubeClientset)
@@ -24,7 +27,11 @@ func createServiceForCluster(cluster *crv1.MySQLCluster, kubeClientset kubernete
 	_, err := servicesInterface.Create(&newService)
 
 	if err != nil && !apierrors.IsAlreadyExists(err) {
-		panic(err)
+		logrus.Panic(err)
+	} else if apierrors.IsAlreadyExists(err) {
+		logrus.WithFields(logrus.Fields{
+			"cluster": cluster.Name,
+		}).Info("Service for cluster already exists")
 	}
 }
 
@@ -36,7 +43,11 @@ func createStatefulSetForCluster(cluster *crv1.MySQLCluster, kubeClientset kuber
 	_, err := statefulSetsInterface.Create(&newStatefulSet)
 
 	if err != nil && !apierrors.IsAlreadyExists(err) {
-		panic(err)
+		logrus.Panic(err)
+	} else if apierrors.IsAlreadyExists(err) {
+		logrus.WithFields(logrus.Fields{
+			"cluster": cluster.Name,
+		}).Info("StatefulSet for cluster already exists")
 	}
 }
 

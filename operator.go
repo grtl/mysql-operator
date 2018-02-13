@@ -38,7 +38,7 @@ func main() {
 
 	kubeClientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		panic(err)
+		logrus.Panic(err)
 	}
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
