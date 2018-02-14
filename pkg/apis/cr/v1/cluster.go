@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -18,11 +19,9 @@ type MySQLCluster struct {
 
 // MySQLClusterSpec stores the properties of a MySQL Cluster.
 type MySQLClusterSpec struct {
-	Name     string `json:"name"`
-	Port     string `json:"port"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Database string `json:"database"`
+	Name     string            `json:"name"`
+	Password string            `json:"password"`
+	Storage  resource.Quantity `json:"storage"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

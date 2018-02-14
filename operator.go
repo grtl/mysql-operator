@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/sirupsen/logrus"
@@ -35,10 +36,15 @@ func main() {
 		logrus.Panic(err)
 	}
 
+	kubeClientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		logrus.Panic(err)
+	}
+
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.NewClusterController(clientset)
+	clusterController := controller.NewClusterController(clientset, kubeClientset)
 	go clusterController.Run(ctx)
 
 	go logging.LogEvents(
