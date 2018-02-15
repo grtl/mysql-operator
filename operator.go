@@ -12,8 +12,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/grtl/mysql-operator/controller"
-	"github.com/grtl/mysql-operator/logging"
+	"github.com/grtl/mysql-operator/controller/cluster"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 )
 
@@ -44,13 +43,13 @@ func main() {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
-	clusterController := controller.NewClusterController(clientset, kubeClientset)
+	clusterController := cluster.NewClusterController(clientset, kubeClientset)
 	go clusterController.Run(ctx)
 
-	go logging.LogEvents(
-		ctx,
-		clusterController,
-	)
+	err = clusterController.AddHook(cluster.NewClusterLoggingHook())
+	if err != nil {
+		logrus.Warn("Could not initialize logging for cluster controller")
+	}
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
