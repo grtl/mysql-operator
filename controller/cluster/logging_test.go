@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/nauyey/factory"
+	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	"github.com/sirupsen/logrus"
@@ -30,7 +31,7 @@ func (suite *ClusterLoggingHookTestSuite) SetupTest() {
 	suite.Require().Nil(err)
 }
 
-func (suite *ClusterLoggingHookTestSuite) TestLogClusterAdd() {
+func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnAdd() {
 	suite.loggingHook.OnAdd(suite.cluster)
 	suite.Assert().Equal(1, len(suite.logrusHook.AllEntries()))
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
@@ -41,7 +42,7 @@ func (suite *ClusterLoggingHookTestSuite) TestLogClusterAdd() {
 	}, suite.logrusHook.LastEntry().Data)
 }
 
-func (suite *ClusterLoggingHookTestSuite) TestLogClusterUpdate() {
+func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnUpdate() {
 	suite.loggingHook.OnUpdate(suite.cluster)
 	suite.Assert().Equal(1, len(suite.logrusHook.AllEntries()))
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
@@ -52,7 +53,7 @@ func (suite *ClusterLoggingHookTestSuite) TestLogClusterUpdate() {
 	}, suite.logrusHook.LastEntry().Data)
 }
 
-func (suite *ClusterLoggingHookTestSuite) TestLogClusterDelete() {
+func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnDelete() {
 	suite.loggingHook.OnDelete(suite.cluster)
 	suite.Assert().Equal(1, len(suite.logrusHook.AllEntries()))
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
@@ -65,4 +66,11 @@ func (suite *ClusterLoggingHookTestSuite) TestLogClusterDelete() {
 
 func TestClusterLoggingHookTestSuite(t *testing.T) {
 	suite.Run(t, new(ClusterLoggingHookTestSuite))
+}
+
+func TestClusterLoggingHook_Registers(t *testing.T) {
+	hook := NewEventsHook(16)
+	clusterController := NewClusterController(nil, nil)
+	err := clusterController.AddHook(hook)
+	require.Nil(t, err)
 }

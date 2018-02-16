@@ -43,6 +43,11 @@ func (c *clusterController) Run(ctx context.Context) error {
 }
 
 func (c *clusterController) AddHook(hook controller.ControllerHook) error {
+	for _, h := range c.hooks {
+		if h == hook {
+			return errors.New("Given hook is already installed in the current controller")
+		}
+	}
 	c.hooks = append(c.hooks, hook)
 	return nil
 }
