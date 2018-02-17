@@ -4,49 +4,49 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
-// ClusterEventType represents type of a ClusterEvent.
-type ClusterEventType int
+// EventType represents type of a Event.
+type EventType int
 
-// Available ClusterEvent types.
+// Available Event types.
 const (
-	ClusterAdded ClusterEventType = iota
+	ClusterAdded EventType = iota
 	ClusterUpdated
 	ClusterDeleted
 )
 
-// ClusterEvent represents event processed by cluster controller.
-type ClusterEvent struct {
-	Type    ClusterEventType
+// Event represents event processed by cluster controller.
+type Event struct {
+	Type    EventType
 	Cluster *crv1.MySQLCluster
 }
 
-// EventsHook is a ControllerHook for cluster controller, which publishes all
+// EventsHook is a Hook for cluster controller, which publishes all
 // processed events to events channel.
 type EventsHook interface {
 	OnAdd(object interface{})
 	OnUpdate(object interface{})
 	OnDelete(object interface{})
-	GetEventsChan() <-chan ClusterEvent
+	GetEventsChan() <-chan Event
 }
 
 type eventsHook struct {
-	events chan ClusterEvent
+	events chan Event
 }
 
 // NewEventsHook returns a new EventsHook with channel with capacity of channelSize.
 func NewEventsHook(channelSize int) EventsHook {
 	return &eventsHook{
-		events: make(chan ClusterEvent, channelSize),
+		events: make(chan Event, channelSize),
 	}
 }
 
-func (h *eventsHook) GetEventsChan() <-chan ClusterEvent {
+func (h *eventsHook) GetEventsChan() <-chan Event {
 	return h.events
 }
 
 func (h *eventsHook) OnAdd(object interface{}) {
 	cluster := object.(*crv1.MySQLCluster)
-	h.events <- ClusterEvent{
+	h.events <- Event{
 		Type:    ClusterAdded,
 		Cluster: cluster,
 	}
@@ -54,7 +54,7 @@ func (h *eventsHook) OnAdd(object interface{}) {
 
 func (h *eventsHook) OnUpdate(object interface{}) {
 	cluster := object.(*crv1.MySQLCluster)
-	h.events <- ClusterEvent{
+	h.events <- Event{
 		Type:    ClusterUpdated,
 		Cluster: cluster,
 	}
@@ -62,7 +62,7 @@ func (h *eventsHook) OnUpdate(object interface{}) {
 
 func (h *eventsHook) OnDelete(object interface{}) {
 	cluster := object.(*crv1.MySQLCluster)
-	h.events <- ClusterEvent{
+	h.events <- Event{
 		Type:    ClusterDeleted,
 		Cluster: cluster,
 	}

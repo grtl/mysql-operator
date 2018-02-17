@@ -18,7 +18,7 @@ type EventsHookTestSuite struct {
 	cluster    *crv1.MySQLCluster
 }
 
-type eventTest func(ClusterEvent)
+type eventTest func(Event)
 
 const TIMEOUT = time.Second * 1
 
@@ -41,7 +41,7 @@ func (suite *EventsHookTestSuite) SetupTest() {
 
 func (suite *EventsHookTestSuite) TestEventsHook_OnAdd() {
 	suite.eventsHook.OnAdd(suite.cluster)
-	suite.testWithTimeout(func(event ClusterEvent) {
+	suite.testWithTimeout(func(event Event) {
 		suite.Assert().Equal(ClusterAdded, event.Type)
 		suite.Assert().Equal(suite.cluster, event.Cluster)
 	})
@@ -49,7 +49,7 @@ func (suite *EventsHookTestSuite) TestEventsHook_OnAdd() {
 
 func (suite *EventsHookTestSuite) TestEventsHook_OnUpdate() {
 	suite.eventsHook.OnUpdate(suite.cluster)
-	suite.testWithTimeout(func(event ClusterEvent) {
+	suite.testWithTimeout(func(event Event) {
 		suite.Assert().Equal(ClusterUpdated, event.Type)
 		suite.Assert().Equal(suite.cluster, event.Cluster)
 	})
@@ -57,7 +57,7 @@ func (suite *EventsHookTestSuite) TestEventsHook_OnUpdate() {
 
 func (suite *EventsHookTestSuite) TestEventsHook_OnDelete() {
 	suite.eventsHook.OnDelete(suite.cluster)
-	suite.testWithTimeout(func(event ClusterEvent) {
+	suite.testWithTimeout(func(event Event) {
 		suite.Assert().Equal(ClusterDeleted, event.Type)
 		suite.Assert().Equal(suite.cluster, event.Cluster)
 	})
@@ -70,10 +70,10 @@ func (suite *EventsHookTestSuite) TestEventsHook_GetEventsChan() {
 	hook, ok := suite.eventsHook.(*eventsHook)
 	suite.Assert().True(ok)
 
-	event := ClusterEvent{Type: ClusterAdded, Cluster: suite.cluster}
+	event := Event{Type: ClusterAdded, Cluster: suite.cluster}
 	hook.events <- event
 
-	suite.testWithTimeout(func(clusterEvent ClusterEvent) {
+	suite.testWithTimeout(func(clusterEvent Event) {
 		suite.Require().Equal(event, clusterEvent)
 	})
 }
@@ -82,7 +82,7 @@ func TestEventsHookTestSuite(t *testing.T) {
 	suite.Run(t, new(EventsHookTestSuite))
 }
 
-func TestEventsHookRegisters(t *testing.T) {
+func TestEventsHook_Registers(t *testing.T) {
 	hook := NewEventsHook(16)
 	controller := NewClusterController(nil, nil)
 	err := controller.AddHook(hook)

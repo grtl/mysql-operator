@@ -19,14 +19,14 @@ func NewClusterController(clientset versioned.Interface, kubeClientset kubernete
 	return &clusterController{
 		clientset:     clientset,
 		kubeClientset: kubeClientset,
-		hooks:         []controller.ControllerHook{},
+		hooks:         []controller.Hook{},
 	}
 }
 
 type clusterController struct {
 	clientset     versioned.Interface
 	kubeClientset kubernetes.Interface
-	hooks         []controller.ControllerHook
+	hooks         []controller.Hook
 }
 
 func (c *clusterController) Run(ctx context.Context) error {
@@ -42,7 +42,7 @@ func (c *clusterController) Run(ctx context.Context) error {
 	return ctx.Err()
 }
 
-func (c *clusterController) AddHook(hook controller.ControllerHook) error {
+func (c *clusterController) AddHook(hook controller.Hook) error {
 	for _, h := range c.hooks {
 		if h == hook {
 			return errors.New("Given hook is already installed in the current controller")
@@ -52,7 +52,7 @@ func (c *clusterController) AddHook(hook controller.ControllerHook) error {
 	return nil
 }
 
-func (c *clusterController) RemoveHook(hook controller.ControllerHook) error {
+func (c *clusterController) RemoveHook(hook controller.Hook) error {
 	for i, h := range c.hooks {
 		if h == hook {
 			// Removing hooks is not that common so we can afford it in O(n)
