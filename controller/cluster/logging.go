@@ -13,13 +13,15 @@ const (
 	clusterDeleted = "Deleted"
 )
 
-type clusterLoggingHook struct{}
+type loggingHook struct{}
 
-func NewClusterLoggingHook() controller.ControllerHook {
-	return &clusterLoggingHook{}
+// NewLoggingHook returns new Hook for cluster controller.
+// LoggingHook logs given objects among with the event type.
+func NewLoggingHook() controller.Hook {
+	return new(loggingHook)
 }
 
-func (h *clusterLoggingHook) OnAdd(object interface{}) {
+func (h *loggingHook) OnAdd(object interface{}) {
 	cluster := object.(*crv1.MySQLCluster)
 	logrus.WithFields(logrus.Fields{
 		"cluster": cluster.Name,
@@ -27,7 +29,7 @@ func (h *clusterLoggingHook) OnAdd(object interface{}) {
 	}).Info("Received cluster event")
 }
 
-func (h *clusterLoggingHook) OnUpdate(object interface{}) {
+func (h *loggingHook) OnUpdate(object interface{}) {
 	cluster := object.(*crv1.MySQLCluster)
 	logrus.WithFields(logrus.Fields{
 		"cluster": cluster.Name,
@@ -35,7 +37,7 @@ func (h *clusterLoggingHook) OnUpdate(object interface{}) {
 	}).Info("Received cluster event")
 }
 
-func (h *clusterLoggingHook) OnDelete(object interface{}) {
+func (h *loggingHook) OnDelete(object interface{}) {
 	cluster := object.(*crv1.MySQLCluster)
 	logrus.WithFields(logrus.Fields{
 		"cluster": cluster.Name,

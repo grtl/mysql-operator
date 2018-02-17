@@ -15,15 +15,15 @@ import (
 	testingFactory "github.com/grtl/mysql-operator/testing/factory"
 )
 
-type ClusterLoggingHookTestSuite struct {
+type LoggingHookTestSuite struct {
 	suite.Suite
-	loggingHook controller.ControllerHook
+	loggingHook controller.Hook
 	logrusHook  *test.Hook
 	cluster     *crv1.MySQLCluster
 }
 
-func (suite *ClusterLoggingHookTestSuite) SetupTest() {
-	suite.loggingHook = NewClusterLoggingHook()
+func (suite *LoggingHookTestSuite) SetupTest() {
+	suite.loggingHook = NewLoggingHook()
 	suite.logrusHook = test.NewGlobal()
 
 	suite.cluster = &crv1.MySQLCluster{}
@@ -31,7 +31,7 @@ func (suite *ClusterLoggingHookTestSuite) SetupTest() {
 	suite.Require().Nil(err)
 }
 
-func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnAdd() {
+func (suite *LoggingHookTestSuite) TestLoggingHook_OnAdd() {
 	suite.loggingHook.OnAdd(suite.cluster)
 	suite.Assert().Equal(1, len(suite.logrusHook.AllEntries()))
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
@@ -42,7 +42,7 @@ func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnAdd() {
 	}, suite.logrusHook.LastEntry().Data)
 }
 
-func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnUpdate() {
+func (suite *LoggingHookTestSuite) TestLoggingHook_OnUpdate() {
 	suite.loggingHook.OnUpdate(suite.cluster)
 	suite.Assert().Equal(1, len(suite.logrusHook.AllEntries()))
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
@@ -53,7 +53,7 @@ func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnUpdate() {
 	}, suite.logrusHook.LastEntry().Data)
 }
 
-func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnDelete() {
+func (suite *LoggingHookTestSuite) TestLoggingHook_OnDelete() {
 	suite.loggingHook.OnDelete(suite.cluster)
 	suite.Assert().Equal(1, len(suite.logrusHook.AllEntries()))
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
@@ -64,11 +64,11 @@ func (suite *ClusterLoggingHookTestSuite) TestClusterLoggingHook_OnDelete() {
 	}, suite.logrusHook.LastEntry().Data)
 }
 
-func TestClusterLoggingHookTestSuite(t *testing.T) {
-	suite.Run(t, new(ClusterLoggingHookTestSuite))
+func TestLoggingHookTestSuite(t *testing.T) {
+	suite.Run(t, new(LoggingHookTestSuite))
 }
 
-func TestClusterLoggingHook_Registers(t *testing.T) {
+func TestLoggingHook_Registers(t *testing.T) {
 	hook := NewEventsHook(16)
 	clusterController := NewClusterController(nil, nil)
 	err := clusterController.AddHook(hook)

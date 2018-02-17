@@ -44,12 +44,11 @@ func main() {
 	defer cancelFunc()
 
 	clusterController := cluster.NewClusterController(clientset, kubeClientset)
-	go clusterController.Run(ctx)
-
-	err = clusterController.AddHook(cluster.NewClusterLoggingHook())
+	err = clusterController.AddHook(cluster.NewLoggingHook())
 	if err != nil {
 		logrus.Warn("Could not initialize logging for cluster controller")
 	}
+	go clusterController.Run(ctx)
 
 	signals := make(chan os.Signal, 1)
 	signal.Notify(signals, syscall.SIGINT, syscall.SIGTERM)
