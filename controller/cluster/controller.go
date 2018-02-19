@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/grtl/mysql-operator/controller"
-	"github.com/grtl/mysql-operator/operator"
+	operator "github.com/grtl/mysql-operator/operator/cluster"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/pkg/client/informers/externalversions"
