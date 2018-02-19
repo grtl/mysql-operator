@@ -1,8 +1,8 @@
 package cluster
 
 import (
-	v1beta2 "k8s.io/api/apps/v1beta2"
-	v1 "k8s.io/api/core/v1"
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -35,7 +35,7 @@ func createServiceForCluster(cluster *crv1.MySQLCluster, kubeClientset kubernete
 }
 
 func createStatefulSetForCluster(cluster *crv1.MySQLCluster, kubeClientset kubernetes.Interface) {
-	statefulSetsInterface := kubeClientset.AppsV1beta2().StatefulSets(cluster.ObjectMeta.Namespace)
+	statefulSetsInterface := kubeClientset.AppsV1().StatefulSets(cluster.ObjectMeta.Namespace)
 
 	newStatefulSet := statefulSetForCluster(cluster)
 	_, err := statefulSetsInterface.Create(&newStatefulSet)
@@ -48,15 +48,15 @@ func createStatefulSetForCluster(cluster *crv1.MySQLCluster, kubeClientset kuber
 	}
 }
 
-func serviceForCluster(cluster *crv1.MySQLCluster) v1.Service {
-	return v1.Service{
+func serviceForCluster(cluster *crv1.MySQLCluster) corev1.Service {
+	return corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: cluster.Spec.Name,
 		},
-		Spec: v1.ServiceSpec{
+		Spec: corev1.ServiceSpec{
 			ClusterIP: "None",
-			Ports: []v1.ServicePort{
-				v1.ServicePort{
+			Ports: []corev1.ServicePort{
+				{
 					Port: mySQLPortNumber,
 				},
 			},
@@ -67,12 +67,12 @@ func serviceForCluster(cluster *crv1.MySQLCluster) v1.Service {
 	}
 }
 
-func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
+func statefulSetForCluster(cluster *crv1.MySQLCluster) appsv1.StatefulSet {
 	namespace := cluster.ObjectMeta.Namespace
 
 	stsSpec := statefulSetSpecForCluster(cluster)
 
-	return v1beta2.StatefulSet{
+	return appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      cluster.Spec.Name,
 			Namespace: namespace,
@@ -81,7 +81,7 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSet {
 	}
 }
 
-func statefulSetSpecForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSetSpec {
+func statefulSetSpecForCluster(cluster *crv1.MySQLCluster) appsv1.StatefulSetSpec {
 	labels := map[string]string{
 		"mysql-cluster": cluster.Spec.Name,
 	}
@@ -96,40 +96,40 @@ func statefulSetSpecForCluster(cluster *crv1.MySQLCluster) v1beta2.StatefulSetSp
 
 	pvc := pvcForCluster(cluster)
 
-	return v1beta2.StatefulSetSpec{
+	return appsv1.StatefulSetSpec{
 		Replicas:    &replicas,
 		ServiceName: cluster.Spec.Name,
 		Selector:    &selector,
-		Template: v1.PodTemplateSpec{
+		Template: corev1.PodTemplateSpec{
 			ObjectMeta: metav1.ObjectMeta{
 				Labels: labels,
 			},
-			Spec: v1.PodSpec{
-				Containers: []v1.Container{
+			Spec: corev1.PodSpec{
+				Containers: []corev1.Container{
 					container,
 				},
 			},
 		},
-		VolumeClaimTemplates: []v1.PersistentVolumeClaim{
+		VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
 			pvc,
 		},
 	}
 }
 
-func containerForCluster(cluster *crv1.MySQLCluster) v1.Container {
-	envVars := []v1.EnvVar{
-		v1.EnvVar{
+func containerForCluster(cluster *crv1.MySQLCluster) corev1.Container {
+	envVars := []corev1.EnvVar{
+		{
 			Name:  "MYSQL_ROOT_PASSWORD",
 			Value: cluster.Spec.Password,
 		},
 	}
 
-	return v1.Container{
+	return corev1.Container{
 		Name:  cluster.Spec.Name,
 		Image: "mysql:8",
 		Env:   envVars,
-		VolumeMounts: []v1.VolumeMount{
-			v1.VolumeMount{
+		VolumeMounts: []corev1.VolumeMount{
+			{
 				Name:      "mysql",
 				MountPath: "/var/lib/mysql",
 			},
@@ -137,17 +137,17 @@ func containerForCluster(cluster *crv1.MySQLCluster) v1.Container {
 	}
 }
 
-func pvcForCluster(cluster *crv1.MySQLCluster) v1.PersistentVolumeClaim {
-	return v1.PersistentVolumeClaim{
+func pvcForCluster(cluster *crv1.MySQLCluster) corev1.PersistentVolumeClaim {
+	return corev1.PersistentVolumeClaim{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "mysql",
 		},
-		Spec: v1.PersistentVolumeClaimSpec{
-			AccessModes: []v1.PersistentVolumeAccessMode{
+		Spec: corev1.PersistentVolumeClaimSpec{
+			AccessModes: []corev1.PersistentVolumeAccessMode{
 				"ReadWriteOnce",
 			},
-			Resources: v1.ResourceRequirements{
-				Requests: v1.ResourceList{
+			Resources: corev1.ResourceRequirements{
+				Requests: corev1.ResourceList{
 					"storage": cluster.Spec.Storage,
 				},
 			},
