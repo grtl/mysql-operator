@@ -1,4 +1,4 @@
-package operator
+package cluster
 
 import (
 	v1beta2 "k8s.io/api/apps/v1beta2"
