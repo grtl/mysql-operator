@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Spec.Name }}-read
+  labels:
+    app: {{ .Spec.Name }}
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+  selector:
+    app: {{ .Spec.Name }}

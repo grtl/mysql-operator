@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Spec.Name }}
+  labels:
+    app: {{ .Spec.Name }}
+spec:
+  ports:
+  - name: mysql
+    port: 3306
+  clusterIP: None
+  selector:
+    app: {{ .Spec.Name }}
