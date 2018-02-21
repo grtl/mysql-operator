@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"github.com/grtl/mysql-operator/controller"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
@@ -20,12 +21,10 @@ type Event struct {
 	Cluster *crv1.MySQLCluster
 }
 
-// EventsHook is a Hook for cluster controller, which publishes all
-// processed events to events channel.
+// EventsHook extends `controller.Hook`. All processed events are published to
+// events channel.
 type EventsHook interface {
-	OnAdd(object interface{})
-	OnUpdate(object interface{})
-	OnDelete(object interface{})
+	controller.Hook
 	GetEventsChan() <-chan Event
 }
 

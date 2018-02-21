@@ -13,11 +13,15 @@ const (
 	clusterDeleted = "Deleted"
 )
 
+// LoggingHook extends `controller.Hook`. All processed events are logged.
+type LoggingHook interface {
+	controller.Hook
+}
+
 type loggingHook struct{}
 
 // NewLoggingHook returns new Hook for cluster controller.
-// LoggingHook logs given objects among with the event type.
-func NewLoggingHook() controller.Hook {
+func NewLoggingHook() LoggingHook {
 	return new(loggingHook)
 }
 

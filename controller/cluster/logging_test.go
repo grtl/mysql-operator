@@ -10,14 +10,13 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 
-	"github.com/grtl/mysql-operator/controller"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	testingFactory "github.com/grtl/mysql-operator/testing/factory"
 )
 
 type LoggingHookTestSuite struct {
 	suite.Suite
-	loggingHook controller.Hook
+	loggingHook LoggingHook
 	logrusHook  *test.Hook
 	cluster     *crv1.MySQLCluster
 }
