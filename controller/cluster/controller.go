@@ -17,16 +17,16 @@ import (
 // NewClusterController returns new cluster controller.
 func NewClusterController(clientset versioned.Interface, kubeClientset kubernetes.Interface) controller.Controller {
 	return &clusterController{
-		clientset:     clientset,
-		kubeClientset: kubeClientset,
-		hooks:         []controller.Hook{},
+		clientset:       clientset,
+		clusterOperator: operator.NewClusterOperator(kubeClientset),
+		hooks:           []controller.Hook{},
 	}
 }
 
 type clusterController struct {
-	clientset     versioned.Interface
-	kubeClientset kubernetes.Interface
-	hooks         []controller.Hook
+	clientset       versioned.Interface
+	clusterOperator operator.Operator
+	hooks           []controller.Hook
 }
 
 func (c *clusterController) Run(ctx context.Context) error {
@@ -65,7 +65,7 @@ func (c *clusterController) RemoveHook(hook controller.Hook) error {
 
 func (c *clusterController) onAdd(obj interface{}) {
 	cluster := obj.(*crv1.MySQLCluster)
-	operator.AddCluster(cluster, c.kubeClientset)
+	c.clusterOperator.AddCluster(cluster)
 	for _, hook := range c.hooks {
 		hook.OnAdd(cluster)
 	}
