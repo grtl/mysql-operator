@@ -1,50 +1,24 @@
 package cluster
 
 import (
-	"github.com/sirupsen/logrus"
-
-	"github.com/grtl/mysql-operator/controller"
+	"github.com/grtl/mysql-operator/logging"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
+type clusterEvent string
+
 const (
-	clusterAdded   = "Added"
-	clusterUpdated = "Updated"
-	clusterDeleted = "Deleted"
+	clusterAdded   clusterEvent = "Added"
+	clusterUpdated clusterEvent = "Updated"
+	clusterDeleted clusterEvent = "Deleted"
 )
 
-// LoggingHook extends `controller.Hook`. All processed events are logged.
-type LoggingHook interface {
-	controller.Hook
+func logClusterEventBegin(cluster *crv1.MySQLCluster, event clusterEvent) {
+	logging.LogCluster(cluster).WithField(
+		"event", event).Info("Received cluster event")
 }
 
-type loggingHook struct{}
-
-// NewLoggingHook returns new Hook for cluster controller.
-func NewLoggingHook() LoggingHook {
-	return new(loggingHook)
-}
-
-func (h *loggingHook) OnAdd(object interface{}) {
-	cluster := object.(*crv1.MySQLCluster)
-	logrus.WithFields(logrus.Fields{
-		"cluster": cluster.Name,
-		"event":   clusterAdded,
-	}).Info("Received cluster event")
-}
-
-func (h *loggingHook) OnUpdate(object interface{}) {
-	cluster := object.(*crv1.MySQLCluster)
-	logrus.WithFields(logrus.Fields{
-		"cluster": cluster.Name,
-		"event":   clusterUpdated,
-	}).Info("Received cluster event")
-}
-
-func (h *loggingHook) OnDelete(object interface{}) {
-	cluster := object.(*crv1.MySQLCluster)
-	logrus.WithFields(logrus.Fields{
-		"cluster": cluster.Name,
-		"event":   clusterDeleted,
-	}).Info("Received cluster event")
+func logClusterEventSuccess(cluster *crv1.MySQLCluster, event clusterEvent) {
+	logging.LogCluster(cluster).WithField(
+		"event", event).Info("Successfully processed cluster event")
 }

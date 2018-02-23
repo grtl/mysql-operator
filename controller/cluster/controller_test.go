@@ -2,6 +2,7 @@ package cluster
 
 import (
 	"context"
+	"io/ioutil"
 	"testing"
 	"time"
 
@@ -9,12 +10,11 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	"k8s.io/apimachinery/pkg/watch"
-	kubeFake "k8s.io/client-go/kubernetes/fake"
-	kubeTesting "k8s.io/client-go/testing"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/grtl/mysql-operator/controller"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
-	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned/fake"
 	testFactory "github.com/grtl/mysql-operator/testing/factory"
 )
 
@@ -40,13 +40,11 @@ func (suite *ClusterControllerTestSuite) testWithTimeout(test eventTest) {
 }
 
 func (suite *ClusterControllerTestSuite) SetupTest() {
-	// Initialize the controller
-	kubeClientset := kubeFake.NewSimpleClientset()
-	clientset := fake.NewSimpleClientset()
+	// Turn off logging output
+	logrus.SetOutput(ioutil.Discard)
 
-	suite.watcher = watch.NewFakeWithChanSize(16, false)
-	clientset.PrependWatchReactor("mysqlclusters", kubeTesting.DefaultWatchReactor(suite.watcher, nil))
-	suite.controller = NewClusterController(clientset, kubeClientset)
+	// Initialize the controller
+	suite.watcher, suite.controller = NewFakeClusterController(16)
 	suite.eventsHook = NewEventsHook(16)
 	err := suite.controller.AddHook(suite.eventsHook)
 	suite.Require().Nil(err)

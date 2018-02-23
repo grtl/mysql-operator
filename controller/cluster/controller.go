@@ -8,6 +8,7 @@ import (
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/grtl/mysql-operator/controller"
+	"github.com/grtl/mysql-operator/logging"
 	operator "github.com/grtl/mysql-operator/operator/cluster"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
@@ -65,7 +66,18 @@ func (c *clusterController) RemoveHook(hook controller.Hook) error {
 
 func (c *clusterController) onAdd(obj interface{}) {
 	cluster := obj.(*crv1.MySQLCluster)
-	c.clusterOperator.AddCluster(cluster)
+
+	logClusterEventBegin(cluster, clusterAdded)
+
+	err := c.clusterOperator.AddCluster(cluster)
+	if err != nil {
+		logging.LogCluster(cluster).WithField("event", clusterAdded).Error(err)
+		return
+	}
+
+	logClusterEventSuccess(cluster, clusterAdded)
+
+	// Run hooks
 	for _, hook := range c.hooks {
 		hook.OnAdd(cluster)
 	}
@@ -73,6 +85,12 @@ func (c *clusterController) onAdd(obj interface{}) {
 
 func (c *clusterController) onUpdate(oldObj, newObj interface{}) {
 	newCluster := newObj.(*crv1.MySQLCluster)
+
+	logClusterEventBegin(newCluster, clusterUpdated)
+
+	logClusterEventSuccess(newCluster, clusterUpdated)
+
+	// Run hooks
 	for _, hook := range c.hooks {
 		hook.OnUpdate(newCluster)
 	}
@@ -80,6 +98,12 @@ func (c *clusterController) onUpdate(oldObj, newObj interface{}) {
 
 func (c *clusterController) onDelete(obj interface{}) {
 	cluster := obj.(*crv1.MySQLCluster)
+
+	logClusterEventBegin(cluster, clusterDeleted)
+
+	logClusterEventSuccess(cluster, clusterDeleted)
+
+	// Run hooks
 	for _, hook := range c.hooks {
 		hook.OnDelete(cluster)
 	}
