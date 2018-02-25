@@ -22,6 +22,7 @@ type MySQLClusterSpec struct {
 	Name     string            `json:"name"`
 	Password string            `json:"password"`
 	Storage  resource.Quantity `json:"storage"`
+	Replicas int32             `json:"replicas"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
