@@ -7,12 +7,14 @@ import (
 	"os/signal"
 	"syscall"
 
+	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
 	"github.com/sirupsen/logrus"
 
 	"github.com/grtl/mysql-operator/controller/cluster"
+	"github.com/grtl/mysql-operator/crd"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 )
 
@@ -26,6 +28,16 @@ func main() {
 
 	flag.Parse()
 	config, err := clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
+	if err != nil {
+		logrus.Panic(err)
+	}
+
+	extClientset, err := apiextensionsclient.NewForConfig(config)
+	if err != nil {
+		logrus.Panic(err)
+	}
+
+	err = crd.CreateMySQLClusterCRD(extClientset)
 	if err != nil {
 		logrus.Panic(err)
 	}
