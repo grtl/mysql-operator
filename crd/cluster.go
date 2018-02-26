@@ -1,15 +1,18 @@
 package crd
 
 import (
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	apiextensions "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/util/errors"
 
 	"github.com/grtl/mysql-operator/util"
 )
 
-func CreateMySQLClusterCRD(clientset *apiextensionsclient.Clientset) error {
-	crd, err := util.YAMLToCRD("artifacts/mysqlcrd.yaml")
+// CreateClusterCRD registers a MySQLCluster custom resource.
+func CreateClusterCRD(clientset *apiextensions.Clientset) error {
+	crd := new(apiextensionsv1.CustomResourceDefinition)
+	err := util.ObjectFromFile("artifacts/mysql-crd.yaml", crd)
 	if err != nil {
 		return err
 	}
@@ -24,13 +27,10 @@ func CreateMySQLClusterCRD(clientset *apiextensionsclient.Clientset) error {
 		return err
 	}
 
-	err = util.WaitForCRDEstablished(clientset, crd.ObjectMeta.Name)
+	err = WaitForCRDEstablished(clientset, crd.ObjectMeta.Name)
 	if err != nil {
 		deleteErr := crdInterface.Delete(crd.ObjectMeta.Name, nil)
-		if deleteErr != nil {
-			return errors.NewAggregate([]error{err, deleteErr})
-		}
-		return err
+		return errors.NewAggregate([]error{err, deleteErr})
 	}
 
 	return nil
