@@ -25,12 +25,17 @@ import (
 
 type CrV1Interface interface {
 	RESTClient() rest.Interface
+	MySQLBackupsGetter
 	MySQLClustersGetter
 }
 
 // CrV1Client is used to interact with features provided by the cr.mysqloperator.grtl.github.com group.
 type CrV1Client struct {
 	restClient rest.Interface
+}
+
+func (c *CrV1Client) MySQLBackups(namespace string) MySQLBackupInterface {
+	return newMySQLBackups(c, namespace)
 }
 
 func (c *CrV1Client) MySQLClusters(namespace string) MySQLClusterInterface {

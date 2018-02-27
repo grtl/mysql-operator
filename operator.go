@@ -100,5 +100,10 @@ func initializeObjects() error {
 		return err
 	}
 
+	err = crd.CreateBackupCRD(extClientset)
+	if err != nil {
+		return err
+	}
+
 	return operator.CreateConfigMap(kubeClientset)
 }

@@ -31,8 +31,10 @@ func Resource(resource string) schema.GroupResource {
 // Adds known types to Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
-		&MySQLCluster{},
-		&MySQLClusterList{},
+		new(MySQLCluster),
+		new(MySQLClusterList),
+		new(MySQLBackup),
+		new(MySQLBackupList),
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil
