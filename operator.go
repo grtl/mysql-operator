@@ -14,6 +14,7 @@ import (
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/grtl/mysql-operator/controller/backup"
 	"github.com/grtl/mysql-operator/controller/cluster"
 	"github.com/grtl/mysql-operator/crd"
 	operator "github.com/grtl/mysql-operator/operator/cluster"
@@ -56,13 +57,16 @@ func main() {
 		logrus.Panic(err)
 	}
 
-	logrus.Debug("Starting the controller")
-
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 
+	logrus.Debug("Starting the cluster controller")
 	clusterController := cluster.NewClusterController(clientset, kubeClientset)
 	go clusterController.Run(ctx)
+
+	logrus.Debug("Starting the backup controller")
+	backupController := backup.NewBackupController(clientset)
+	go backupController.Run(ctx)
 
 	logrus.Info("Listening for events")
 
