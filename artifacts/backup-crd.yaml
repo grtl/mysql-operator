@@ -1,0 +1,13 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mysqlbackups.cr.mysqloperator.grtl.github.com
+spec:
+  group: cr.mysqloperator.grtl.github.com
+  names:
+    kind: MySQLBackup
+    listKind: MySQLBackupList
+    singular: mysqlbackup
+    plural: mysqlbackups
+  scope: Namespaced
+  version: v1
