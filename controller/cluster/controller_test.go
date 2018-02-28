@@ -25,10 +25,14 @@ type ClusterControllerTestSuite struct {
 
 	controller controller.Controller
 	watcher    *watch.FakeWatcher
-	eventsHook EventsHook
+	eventsHook controller.EventsHook
 
 	cancelFunc context.CancelFunc
 }
+
+type eventTest func(controller.Event)
+
+const TIMEOUT = time.Second * 1
 
 func (suite *ClusterControllerTestSuite) testWithTimeout(test eventTest) {
 	select {
@@ -45,12 +49,12 @@ func (suite *ClusterControllerTestSuite) SetupTest() {
 
 	// Initialize the controller
 	suite.watcher, suite.controller = NewFakeClusterController(16)
-	suite.eventsHook = NewEventsHook(16)
+	suite.eventsHook = controller.NewEventsHook(16)
 	err := suite.controller.AddHook(suite.eventsHook)
 	suite.Require().Nil(err)
 
 	// Test Cluster
-	suite.cluster = &crv1.MySQLCluster{}
+	suite.cluster = new(crv1.MySQLCluster)
 	err = factory.Build(testFactory.MySQLClusterFactory).To(suite.cluster)
 	suite.Require().Nil(err)
 	suite.watcher.Add(suite.cluster)
@@ -68,42 +72,42 @@ func (suite *ClusterControllerTestSuite) TearDownTest() {
 
 // Test if onAdd function is being called.
 func (suite *ClusterControllerTestSuite) TestClusterController_OnAdd() {
-	suite.testWithTimeout(func(clusterEvent Event) {
-		suite.Require().Equal(ClusterAdded, clusterEvent.Type)
-		suite.Equal(suite.cluster, clusterEvent.Cluster)
+	suite.testWithTimeout(func(event controller.Event) {
+		suite.Require().Equal(controller.EventAdded, event.Type)
+		suite.Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
 	})
 }
 
 // Test if onUpdate function is being called.
 func (suite *ClusterControllerTestSuite) TestClusterController_OnUpdate() {
-	// Ignore clusterAdded event
-	suite.testWithTimeout(func(clusterEvent Event) {
-		suite.Require().Equal(ClusterAdded, clusterEvent.Type)
+	// Ignore added event
+	suite.testWithTimeout(func(event controller.Event) {
+		suite.Require().Equal(controller.EventAdded, event.Type)
 	})
 
 	// Update cluster
 	suite.cluster.Spec.Name += "-updated"
 	suite.watcher.Modify(suite.cluster)
 
-	suite.testWithTimeout(func(clusterEvent Event) {
-		suite.Require().Equal(ClusterUpdated, clusterEvent.Type)
-		suite.Equal(suite.cluster, clusterEvent.Cluster)
+	suite.testWithTimeout(func(event controller.Event) {
+		suite.Require().Equal(controller.EventUpdated, event.Type)
+		suite.Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
 	})
 }
 
 // Test if onDelete function is being called.
 func (suite *ClusterControllerTestSuite) TestClusterController_OnDelete() {
-	// Ignore clusterAdded event
-	suite.testWithTimeout(func(clusterEvent Event) {
-		suite.Require().Equal(ClusterAdded, clusterEvent.Type)
+	// Ignore added event
+	suite.testWithTimeout(func(event controller.Event) {
+		suite.Require().Equal(controller.EventAdded, event.Type)
 	})
 
 	// Delete cluster
 	suite.watcher.Delete(suite.cluster)
 
-	suite.testWithTimeout(func(clusterEvent Event) {
-		suite.Require().Equal(ClusterDeleted, clusterEvent.Type)
-		suite.Equal(suite.cluster, clusterEvent.Cluster)
+	suite.testWithTimeout(func(event controller.Event) {
+		suite.Require().Equal(controller.EventDeleted, event.Type)
+		suite.Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
 	})
 }
 
@@ -126,7 +130,7 @@ func (suite *ClusterControllerHooksTestSuite) TestClusterController_AddHook() {
 	suite.Require().Equal(0, len(suite.controller.hooks))
 
 	// Add hook
-	hook := NewEventsHook(1) // Any hook will do
+	hook := controller.NewEventsHook(1) // Any hook will do
 	err := suite.controller.AddHook(hook)
 	suite.Assert().Nil(err)
 	suite.Require().Equal(1, len(suite.controller.hooks))
@@ -137,15 +141,15 @@ func (suite *ClusterControllerHooksTestSuite) TestClusterController_AddHook() {
 	suite.Require().Equal(1, len(suite.controller.hooks))
 
 	// Add another hook
-	anotherHook := NewEventsHook(1) // Any hook will do
+	anotherHook := controller.NewEventsHook(1) // Any hook will do
 	err = suite.controller.AddHook(anotherHook)
 	suite.Assert().Nil(err)
 	suite.Require().Equal(2, len(suite.controller.hooks))
 }
 
 func (suite *ClusterControllerHooksTestSuite) TestClusterController_RemoveHook() {
-	hook := NewEventsHook(1)
-	anotherHook := NewEventsHook(1)
+	hook := controller.NewEventsHook(1)
+	anotherHook := controller.NewEventsHook(1)
 	err := suite.controller.AddHook(hook)
 	suite.Assert().Nil(err)
 	err = suite.controller.AddHook(anotherHook)

@@ -1,11 +1,10 @@
-package cluster
+package controller
 
 import (
 	"testing"
 	"time"
 
 	"github.com/nauyey/factory"
-	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
 
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
@@ -42,24 +41,24 @@ func (suite *EventsHookTestSuite) SetupTest() {
 func (suite *EventsHookTestSuite) TestEventsHook_OnAdd() {
 	suite.eventsHook.OnAdd(suite.cluster)
 	suite.testWithTimeout(func(event Event) {
-		suite.Assert().Equal(ClusterAdded, event.Type)
-		suite.Assert().Equal(suite.cluster, event.Cluster)
+		suite.Assert().Equal(EventAdded, event.Type)
+		suite.Assert().Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
 	})
 }
 
 func (suite *EventsHookTestSuite) TestEventsHook_OnUpdate() {
 	suite.eventsHook.OnUpdate(suite.cluster)
 	suite.testWithTimeout(func(event Event) {
-		suite.Assert().Equal(ClusterUpdated, event.Type)
-		suite.Assert().Equal(suite.cluster, event.Cluster)
+		suite.Assert().Equal(EventUpdated, event.Type)
+		suite.Assert().Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
 	})
 }
 
 func (suite *EventsHookTestSuite) TestEventsHook_OnDelete() {
 	suite.eventsHook.OnDelete(suite.cluster)
 	suite.testWithTimeout(func(event Event) {
-		suite.Assert().Equal(ClusterDeleted, event.Type)
-		suite.Assert().Equal(suite.cluster, event.Cluster)
+		suite.Assert().Equal(EventDeleted, event.Type)
+		suite.Assert().Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
 	})
 }
 
@@ -70,7 +69,7 @@ func (suite *EventsHookTestSuite) TestEventsHook_GetEventsChan() {
 	hook, ok := suite.eventsHook.(*eventsHook)
 	suite.Assert().True(ok)
 
-	event := Event{Type: ClusterAdded, Cluster: suite.cluster}
+	event := Event{Type: EventAdded, Object: suite.cluster}
 	hook.events <- event
 
 	suite.testWithTimeout(func(clusterEvent Event) {
@@ -80,11 +79,4 @@ func (suite *EventsHookTestSuite) TestEventsHook_GetEventsChan() {
 
 func TestEventsHookTestSuite(t *testing.T) {
 	suite.Run(t, new(EventsHookTestSuite))
-}
-
-func TestEventsHook_Registers(t *testing.T) {
-	hook := NewEventsHook(16)
-	controller := NewClusterController(nil, nil)
-	err := controller.AddHook(hook)
-	require.Nil(t, err)
 }
