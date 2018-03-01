@@ -1,6 +1,8 @@
 package cluster
 
 import (
+	"fmt"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -15,6 +17,7 @@ import (
 
 const (
 	serviceTemplate     = "artifacts/mysql-service.yaml"
+	serviceReadTemplate = "artifacts/mysql-service-read.yaml"
 	statefulSetTemplate = "artifacts/mysql-statefulset.yaml"
 )
 
@@ -37,15 +40,13 @@ func NewClusterOperator(clientset kubernetes.Interface) Operator {
 
 func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 	logging.LogCluster(cluster).Debug("Creating service.")
-
-	err := c.createService(cluster)
+	err := c.createService(cluster, serviceTemplate)
 	if err != nil {
 		return err
 	}
 
-	logging.LogCluster(cluster).Debug("Creating stateful set.")
-
-	err = c.createStatefulSet(cluster)
+	logging.LogCluster(cluster).Debug("Creating read service.")
+	err = c.createService(cluster, serviceReadTemplate)
 	if err != nil {
 		// Cleanup - remove already created service
 		logging.LogCluster(cluster).WithField(
@@ -54,12 +55,27 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 		return errors.NewAggregate([]error{err, removeErr})
 	}
 
+	logging.LogCluster(cluster).Debug("Creating stateful set.")
+	err = c.createStatefulSet(cluster)
+	if err != nil {
+		// Cleanup - remove already created services
+		logging.LogCluster(cluster).WithField(
+			"error", err).Warn("Reverting service creation.")
+		removeErr := c.removeService(cluster)
+		err = errors.NewAggregate([]error{err, removeErr})
+
+		logging.LogCluster(cluster).WithField(
+			"error", err).Warn("Reverting read service creation.")
+		removeErr = c.removeReadService(cluster)
+		return errors.NewAggregate([]error{err, removeErr})
+	}
+
 	return nil
 }
 
-func (c *clusterOperator) createService(cluster *crv1.MySQLCluster) error {
+func (c *clusterOperator) createService(cluster *crv1.MySQLCluster, filename string) error {
 	serviceInterface := c.clientset.CoreV1().Services(cluster.Namespace)
-	service, err := serviceForCluster(cluster)
+	service, err := serviceForCluster(cluster, filename)
 	if err != nil {
 		return err
 	}
@@ -91,9 +107,9 @@ func (c *clusterOperator) createStatefulSet(cluster *crv1.MySQLCluster) error {
 	return nil
 }
 
-func serviceForCluster(cluster *crv1.MySQLCluster) (*corev1.Service, error) {
+func serviceForCluster(cluster *crv1.MySQLCluster, filename string) (*corev1.Service, error) {
 	service := new(corev1.Service)
-	err := util.ObjectFromTemplate(cluster, service, serviceTemplate)
+	err := util.ObjectFromTemplate(cluster, service, filename)
 	return service, err
 }
 
@@ -106,6 +122,12 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) (*appsv1.StatefulSet, err
 func (c *clusterOperator) removeService(cluster *crv1.MySQLCluster) error {
 	serviceInterface := c.clientset.CoreV1().Services(cluster.Namespace)
 	return serviceInterface.Delete(cluster.Name, new(metav1.DeleteOptions))
+}
+
+func (c *clusterOperator) removeReadService(cluster *crv1.MySQLCluster) error {
+	serviceInterface := c.clientset.CoreV1().Services(cluster.Namespace)
+	serviceName := fmt.Sprintf("%s-read", cluster.Name)
+	return serviceInterface.Delete(serviceName, new(metav1.DeleteOptions))
 }
 
 func (c *clusterOperator) removeStatefulSet(cluster *crv1.MySQLCluster) error {
