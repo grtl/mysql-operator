@@ -4,6 +4,11 @@ metadata:
   name: {{ .Spec.Name }}
   labels:
     app: {{ .Spec.Name }}
+  ownerReferences:
+    - kind: MySQLCluster
+      apiVersion: cr.mysqloperator.grtl.github.com/v1
+      name: {{ .Name }}
+      uid: {{ .UID }}
 spec:
   ports:
   - name: mysql
