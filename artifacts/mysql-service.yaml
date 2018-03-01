@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Spec.Name }}
+  name: {{ .Name }}
   labels:
-    app: {{ .Spec.Name }}
+    app: {{ .Name }}
   ownerReferences:
     - kind: MySQLCluster
       apiVersion: cr.mysqloperator.grtl.github.com/v1
@@ -15,4 +15,4 @@ spec:
     port: 3306
   clusterIP: None
   selector:
-    app: {{ .Spec.Name }}
+    app: {{ .Name }}

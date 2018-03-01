@@ -34,8 +34,7 @@ func TestLogCluster(t *testing.T) {
 	assert.Equal(t, logrus.DebugLevel, logrusHook.LastEntry().Level)
 	assert.Equal(t, "Debug", logrusHook.LastEntry().Message)
 	assert.Equal(t, logrus.Fields{
-		"cluster":     cluster.Name,
-		"clusterName": cluster.Spec.Name,
+		"cluster": cluster.Name,
 	}, logrusHook.LastEntry().Data)
 
 	LogCluster(cluster).Info("Info")
@@ -43,8 +42,7 @@ func TestLogCluster(t *testing.T) {
 	assert.Equal(t, logrus.InfoLevel, logrusHook.LastEntry().Level)
 	assert.Equal(t, "Info", logrusHook.LastEntry().Message)
 	assert.Equal(t, logrus.Fields{
-		"cluster":     cluster.Name,
-		"clusterName": cluster.Spec.Name,
+		"cluster": cluster.Name,
 	}, logrusHook.LastEntry().Data)
 
 	LogCluster(cluster).Warn("Warning")
@@ -52,8 +50,7 @@ func TestLogCluster(t *testing.T) {
 	assert.Equal(t, logrus.WarnLevel, logrusHook.LastEntry().Level)
 	assert.Equal(t, "Warning", logrusHook.LastEntry().Message)
 	assert.Equal(t, logrus.Fields{
-		"cluster":     cluster.Name,
-		"clusterName": cluster.Spec.Name,
+		"cluster": cluster.Name,
 	}, logrusHook.LastEntry().Data)
 
 	LogCluster(cluster).Error("Error")
@@ -61,7 +58,6 @@ func TestLogCluster(t *testing.T) {
 	assert.Equal(t, logrus.ErrorLevel, logrusHook.LastEntry().Level)
 	assert.Equal(t, "Error", logrusHook.LastEntry().Message)
 	assert.Equal(t, logrus.Fields{
-		"cluster":     cluster.Name,
-		"clusterName": cluster.Spec.Name,
+		"cluster": cluster.Name,
 	}, logrusHook.LastEntry().Data)
 }

@@ -8,7 +8,6 @@ import (
 // LogCluster injects cluster data into logrus fields.
 func LogCluster(cluster *crv1.MySQLCluster) *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{
-		"cluster":     cluster.Name,
-		"clusterName": cluster.Spec.Name,
+		"cluster": cluster.Name,
 	})
 }
