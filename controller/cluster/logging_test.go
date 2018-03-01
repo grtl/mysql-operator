@@ -39,9 +39,8 @@ func (suite *LoggingTestSuite) TestLogging_OnAdd() {
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
 	suite.Assert().Equal("Received cluster event", suite.logrusHook.LastEntry().Message)
 	suite.Assert().Equal(logrus.Fields{
-		"cluster":     suite.cluster.Name,
-		"clusterName": suite.cluster.Spec.Name,
-		"event":       clusterAdded,
+		"cluster": suite.cluster.Name,
+		"event":   clusterAdded,
 	}, suite.logrusHook.LastEntry().Data)
 
 	logClusterEventSuccess(suite.cluster, clusterAdded)
@@ -49,9 +48,8 @@ func (suite *LoggingTestSuite) TestLogging_OnAdd() {
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
 	suite.Assert().Equal("Successfully processed cluster event", suite.logrusHook.LastEntry().Message)
 	suite.Assert().Equal(logrus.Fields{
-		"cluster":     suite.cluster.Name,
-		"clusterName": suite.cluster.Spec.Name,
-		"event":       clusterAdded,
+		"cluster": suite.cluster.Name,
+		"event":   clusterAdded,
 	}, suite.logrusHook.LastEntry().Data)
 }
 
@@ -61,9 +59,8 @@ func (suite *LoggingTestSuite) TestLogging_OnUpdate() {
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
 	suite.Assert().Equal("Received cluster event", suite.logrusHook.LastEntry().Message)
 	suite.Assert().Equal(logrus.Fields{
-		"cluster":     suite.cluster.Name,
-		"clusterName": suite.cluster.Spec.Name,
-		"event":       clusterUpdated,
+		"cluster": suite.cluster.Name,
+		"event":   clusterUpdated,
 	}, suite.logrusHook.LastEntry().Data)
 
 	logClusterEventSuccess(suite.cluster, clusterUpdated)
@@ -71,9 +68,8 @@ func (suite *LoggingTestSuite) TestLogging_OnUpdate() {
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
 	suite.Assert().Equal("Successfully processed cluster event", suite.logrusHook.LastEntry().Message)
 	suite.Assert().Equal(logrus.Fields{
-		"cluster":     suite.cluster.Name,
-		"clusterName": suite.cluster.Spec.Name,
-		"event":       clusterUpdated,
+		"cluster": suite.cluster.Name,
+		"event":   clusterUpdated,
 	}, suite.logrusHook.LastEntry().Data)
 }
 
@@ -83,9 +79,8 @@ func (suite *LoggingTestSuite) TestLogging_OnDelete() {
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
 	suite.Assert().Equal("Received cluster event", suite.logrusHook.LastEntry().Message)
 	suite.Assert().Equal(logrus.Fields{
-		"cluster":     suite.cluster.Name,
-		"clusterName": suite.cluster.Spec.Name,
-		"event":       clusterUpdated,
+		"cluster": suite.cluster.Name,
+		"event":   clusterUpdated,
 	}, suite.logrusHook.LastEntry().Data)
 
 	logClusterEventSuccess(suite.cluster, clusterUpdated)
@@ -93,9 +88,8 @@ func (suite *LoggingTestSuite) TestLogging_OnDelete() {
 	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
 	suite.Assert().Equal("Successfully processed cluster event", suite.logrusHook.LastEntry().Message)
 	suite.Assert().Equal(logrus.Fields{
-		"cluster":     suite.cluster.Name,
-		"clusterName": suite.cluster.Spec.Name,
-		"event":       clusterUpdated,
+		"cluster": suite.cluster.Name,
+		"event":   clusterUpdated,
 	}, suite.logrusHook.LastEntry().Data)
 }
 

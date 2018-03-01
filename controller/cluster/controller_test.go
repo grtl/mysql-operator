@@ -86,7 +86,6 @@ func (suite *ClusterControllerTestSuite) TestClusterController_OnUpdate() {
 	})
 
 	// Update cluster
-	suite.cluster.Spec.Name += "-updated"
 	suite.watcher.Modify(suite.cluster)
 
 	suite.testWithTimeout(func(event controller.Event) {

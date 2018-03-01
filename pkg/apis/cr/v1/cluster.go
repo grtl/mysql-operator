@@ -19,7 +19,6 @@ type MySQLCluster struct {
 
 // MySQLClusterSpec stores the properties of a MySQL Cluster.
 type MySQLClusterSpec struct {
-	Name     string            `json:"name"`
 	Password string            `json:"password"`
 	Storage  resource.Quantity `json:"storage"`
 	Replicas int32             `json:"replicas"`
