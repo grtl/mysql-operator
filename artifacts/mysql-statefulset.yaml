@@ -2,6 +2,11 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: {{ .Name }}
+  ownerReferences:
+    - kind: MySQLCluster
+      apiVersion: cr.mysqloperator.grtl.github.com/v1
+      name: {{ .Name }}
+      uid: {{ .UID }}
 spec:
   selector:
     matchLabels:
