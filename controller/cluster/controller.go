@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"context"
-	"errors"
 
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
@@ -18,16 +17,16 @@ import (
 // NewClusterController returns new cluster controller.
 func NewClusterController(clientset versioned.Interface, kubeClientset kubernetes.Interface) controller.Controller {
 	return &clusterController{
+		Base:            controller.NewControllerBase(),
 		clientset:       clientset,
 		clusterOperator: operator.NewClusterOperator(kubeClientset),
-		hooks:           []controller.Hook{},
 	}
 }
 
 type clusterController struct {
+	controller.Base
 	clientset       versioned.Interface
 	clusterOperator operator.Operator
-	hooks           []controller.Hook
 }
 
 func (c *clusterController) Run(ctx context.Context) error {
@@ -41,27 +40,6 @@ func (c *clusterController) Run(ctx context.Context) error {
 	informer.Run(ctx.Done())
 	<-ctx.Done()
 	return ctx.Err()
-}
-
-func (c *clusterController) AddHook(hook controller.Hook) error {
-	for _, h := range c.hooks {
-		if h == hook {
-			return errors.New("Given hook is already installed in the current controller")
-		}
-	}
-	c.hooks = append(c.hooks, hook)
-	return nil
-}
-
-func (c *clusterController) RemoveHook(hook controller.Hook) error {
-	for i, h := range c.hooks {
-		if h == hook {
-			// Removing hooks is not that common so we can afford it in O(n)
-			c.hooks = append(c.hooks[:i], c.hooks[i+1:]...)
-			return nil
-		}
-	}
-	return errors.New("Given hook is not installed in the current controller")
 }
 
 func (c *clusterController) onAdd(obj interface{}) {
@@ -78,7 +56,7 @@ func (c *clusterController) onAdd(obj interface{}) {
 	logClusterEventSuccess(cluster, clusterAdded)
 
 	// Run hooks
-	for _, hook := range c.hooks {
+	for _, hook := range c.GetHooks() {
 		hook.OnAdd(cluster)
 	}
 }
@@ -91,7 +69,7 @@ func (c *clusterController) onUpdate(oldObj, newObj interface{}) {
 	logClusterEventSuccess(newCluster, clusterUpdated)
 
 	// Run hooks
-	for _, hook := range c.hooks {
+	for _, hook := range c.GetHooks() {
 		hook.OnUpdate(newCluster)
 	}
 }
@@ -104,7 +82,7 @@ func (c *clusterController) onDelete(obj interface{}) {
 	logClusterEventSuccess(cluster, clusterDeleted)
 
 	// Run hooks
-	for _, hook := range c.hooks {
+	for _, hook := range c.GetHooks() {
 		hook.OnDelete(cluster)
 	}
 }
