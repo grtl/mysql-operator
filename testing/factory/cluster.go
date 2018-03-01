@@ -16,10 +16,6 @@ var MySQLClusterFactory = def.NewFactory(crv1.MySQLCluster{}, "",
 		return fmt.Sprintf("cluster-%s", randomdata.RandStringRunes(16)), nil
 	}),
 	def.Field("ObjectMeta.Namespace", "default"),
-	def.DynamicField("Spec.Name", func(model interface{}) (interface{}, error) {
-		cluster := model.(*crv1.MySQLCluster)
-		return fmt.Sprintf("%s-name", cluster.Name), nil
-	}),
 	def.DynamicField("Spec.Password", func(model interface{}) (interface{}, error) {
 		return randomdata.GenerateProfile(randomdata.RandomGender).Login.Password, nil
 	}),

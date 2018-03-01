@@ -105,10 +105,10 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) (*appsv1.StatefulSet, err
 
 func (c *clusterOperator) removeService(cluster *crv1.MySQLCluster) error {
 	serviceInterface := c.clientset.CoreV1().Services(cluster.Namespace)
-	return serviceInterface.Delete(cluster.Spec.Name, new(metav1.DeleteOptions))
+	return serviceInterface.Delete(cluster.Name, new(metav1.DeleteOptions))
 }
 
 func (c *clusterOperator) removeStatefulSet(cluster *crv1.MySQLCluster) error {
 	statefulSetInterface := c.clientset.AppsV1().StatefulSets(cluster.Namespace)
-	return statefulSetInterface.Delete(cluster.Spec.Name, new(metav1.DeleteOptions))
+	return statefulSetInterface.Delete(cluster.Name, new(metav1.DeleteOptions))
 }

@@ -1,17 +1,17 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Spec.Name }}
+  name: {{ .Name }}
 spec:
   selector:
     matchLabels:
-      app: {{ .Spec.Name }}
-  serviceName: {{ .Spec.Name }}
+      app: {{ .Name }}
+  serviceName: {{ .Name }}
   replicas: {{ .Spec.Replicas }}
   template:
     metadata:
       labels:
-        app: {{ .Spec.Name }}
+        app: {{ .Name }}
     spec:
       initContainers:
       - name: init-mysql
@@ -52,7 +52,7 @@ spec:
           ordinal=${BASH_REMATCH[1]}
           [[ $ordinal -eq 0 ]] && exit 0
           # Clone data from previous peer.
-          ncat --recv-only {{ .Spec.Name }}-$(($ordinal-1)).{{ .Spec.Name }} 3307 | xbstream -x -C /var/lib/mysql
+          ncat --recv-only {{ .Name }}-$(($ordinal-1)).{{ .Name }} 3307 | xbstream -x -C /var/lib/mysql
           # Prepare the backup.
           xtrabackup --prepare --target-dir=/var/lib/mysql
         volumeMounts:
@@ -130,7 +130,7 @@ spec:
             mv change_master_to.sql.in change_master_to.sql.orig
             mysql -h 127.0.0.1 <<EOF
           $(<change_master_to.sql.orig),
-            MASTER_HOST='{{ .Spec.Name }}-0.{{ .Spec.Name }}',
+            MASTER_HOST='{{ .Name }}-0.{{ .Name }}',
             MASTER_USER='root',
             MASTER_PASSWORD='',
             MASTER_CONNECT_RETRY=10;
