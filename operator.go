@@ -65,7 +65,7 @@ func main() {
 	go clusterController.Run(ctx)
 
 	logrus.Debug("Starting the backup controller")
-	backupController := backup.NewBackupController(clientset)
+	backupController := backup.NewBackupController(clientset, kubeClientset)
 	go backupController.Run(ctx)
 
 	logrus.Info("Listening for events")
