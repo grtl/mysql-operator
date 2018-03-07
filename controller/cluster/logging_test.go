@@ -1,98 +1,182 @@
-package cluster
+package cluster_test
 
 import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+	"github.com/onsi/gomega/gstruct"
+
+	. "github.com/grtl/mysql-operator/controller/cluster"
+
+	"context"
 	"io/ioutil"
-	"testing"
+
+	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/nauyey/factory"
-	"github.com/stretchr/testify/suite"
-
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 
+	"github.com/grtl/mysql-operator/controller"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	testingFactory "github.com/grtl/mysql-operator/testing/factory"
 )
 
-type LoggingTestSuite struct {
-	suite.Suite
-	logrusHook *test.Hook
-	cluster    *crv1.MySQLCluster
-}
-
-func (suite *LoggingTestSuite) SetupTest() {
+var _ = Describe("Logging", func() {
 	// Turn off logging output
 	logrus.SetOutput(ioutil.Discard)
 
-	// Initialize logging hook
-	suite.logrusHook = test.NewGlobal()
+	var (
+		logrusHook *test.Hook
 
-	// Create fake cluster
-	suite.cluster = &crv1.MySQLCluster{}
-	err := factory.Build(testingFactory.MySQLClusterFactory).To(suite.cluster)
-	suite.Require().Nil(err)
-}
+		cluster *crv1.MySQLCluster
 
-func (suite *LoggingTestSuite) TestLogging_OnAdd() {
-	logClusterEventBegin(suite.cluster, clusterAdded)
-	suite.Require().Equal(1, len(suite.logrusHook.AllEntries()))
-	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
-	suite.Assert().Equal("Received cluster event", suite.logrusHook.LastEntry().Message)
-	suite.Assert().Equal(logrus.Fields{
-		"cluster": suite.cluster.Name,
-		"event":   clusterAdded,
-	}, suite.logrusHook.LastEntry().Data)
+		watcher           *watch.FakeWatcher
+		clusterController controller.Controller
+		eventsHook        controller.EventsHook
+	)
 
-	logClusterEventSuccess(suite.cluster, clusterAdded)
-	suite.Require().Equal(2, len(suite.logrusHook.AllEntries()))
-	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
-	suite.Assert().Equal("Successfully processed cluster event", suite.logrusHook.LastEntry().Message)
-	suite.Assert().Equal(logrus.Fields{
-		"cluster": suite.cluster.Name,
-		"event":   clusterAdded,
-	}, suite.logrusHook.LastEntry().Data)
-}
+	BeforeEach(func() {
+		// Initialize logging hook
+		logrusHook = test.NewGlobal()
 
-func (suite *LoggingTestSuite) TestLogging_OnUpdate() {
-	logClusterEventBegin(suite.cluster, clusterUpdated)
-	suite.Require().Equal(1, len(suite.logrusHook.AllEntries()))
-	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
-	suite.Assert().Equal("Received cluster event", suite.logrusHook.LastEntry().Message)
-	suite.Assert().Equal(logrus.Fields{
-		"cluster": suite.cluster.Name,
-		"event":   clusterUpdated,
-	}, suite.logrusHook.LastEntry().Data)
+		// Initialize the controller
+		watcher, clusterController = NewFakeClusterController(16)
+		eventsHook = controller.NewEventsHook(16)
 
-	logClusterEventSuccess(suite.cluster, clusterUpdated)
-	suite.Require().Equal(2, len(suite.logrusHook.AllEntries()))
-	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
-	suite.Assert().Equal("Successfully processed cluster event", suite.logrusHook.LastEntry().Message)
-	suite.Assert().Equal(logrus.Fields{
-		"cluster": suite.cluster.Name,
-		"event":   clusterUpdated,
-	}, suite.logrusHook.LastEntry().Data)
-}
+		// Setup fake cluster
+		cluster = new(crv1.MySQLCluster)
+		err := factory.Build(testingFactory.MySQLClusterFactory).To(cluster)
+		Expect(err).NotTo(HaveOccurred())
+	})
 
-func (suite *LoggingTestSuite) TestLogging_OnDelete() {
-	logClusterEventBegin(suite.cluster, clusterUpdated)
-	suite.Require().Equal(1, len(suite.logrusHook.AllEntries()))
-	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
-	suite.Assert().Equal("Received cluster event", suite.logrusHook.LastEntry().Message)
-	suite.Assert().Equal(logrus.Fields{
-		"cluster": suite.cluster.Name,
-		"event":   clusterUpdated,
-	}, suite.logrusHook.LastEntry().Data)
+	JustBeforeEach(func() {
+		err := clusterController.AddHook(eventsHook)
+		Expect(err).NotTo(HaveOccurred())
 
-	logClusterEventSuccess(suite.cluster, clusterUpdated)
-	suite.Require().Equal(2, len(suite.logrusHook.AllEntries()))
-	suite.Assert().Equal(logrus.InfoLevel, suite.logrusHook.LastEntry().Level)
-	suite.Assert().Equal("Successfully processed cluster event", suite.logrusHook.LastEntry().Message)
-	suite.Assert().Equal(logrus.Fields{
-		"cluster": suite.cluster.Name,
-		"event":   clusterUpdated,
-	}, suite.logrusHook.LastEntry().Data)
-}
+		watcher.Add(cluster)
+	})
 
-func TestLoggingTestSuite(t *testing.T) {
-	suite.Run(t, new(LoggingTestSuite))
-}
+	When("cluster is added", func() {
+		It("event should be logged", func(done Done) {
+			var event controller.Event
+
+			ctx, cancelFunc := context.WithCancel(context.Background())
+			go clusterController.Run(ctx)
+			defer cancelFunc()
+
+			// Wait for
+			Eventually(eventsHook.GetEventsChan()).Should(Receive(&event))
+			Expect(logrusHook.AllEntries()).To(HaveLen(2))
+
+			By("outputting on event received")
+			firstEntry := logrusHook.AllEntries()[0]
+			Expect(*firstEntry).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				"Level":   Equal(logrus.InfoLevel),
+				"Message": Equal("Received cluster event"),
+				"Data": Equal(logrus.Fields{
+					"event":   ClusterAdded,
+					"cluster": cluster.Name,
+				}),
+			}))
+
+			By("outputting on event processed")
+			secondEntry := logrusHook.AllEntries()[1]
+			Expect(*secondEntry).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				"Level":   Equal(logrus.InfoLevel),
+				"Message": Equal("Successfully processed cluster event"),
+				"Data": Equal(logrus.Fields{
+					"event":   ClusterAdded,
+					"cluster": cluster.Name,
+				}),
+			}))
+
+			close(done)
+		})
+	})
+
+	When("cluster is updated", func() {
+		It("event should be logged", func(done Done) {
+			var event controller.Event
+
+			ctx, cancelFunc := context.WithCancel(context.Background())
+			go clusterController.Run(ctx)
+			defer cancelFunc()
+
+			// Ignore added event
+			Eventually(eventsHook.GetEventsChan()).Should(Receive(&event))
+			logrusHook.Reset()
+			watcher.Modify(cluster)
+
+			// Wait for
+			Eventually(eventsHook.GetEventsChan()).Should(Receive(&event))
+			Expect(logrusHook.AllEntries()).To(HaveLen(2))
+
+			By("outputting on event received")
+			firstEntry := logrusHook.AllEntries()[0]
+			Expect(*firstEntry).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				"Level":   Equal(logrus.InfoLevel),
+				"Message": Equal("Received cluster event"),
+				"Data": Equal(logrus.Fields{
+					"event":   ClusterUpdated,
+					"cluster": cluster.Name,
+				}),
+			}))
+
+			By("outputting on event processed")
+			secondEntry := logrusHook.AllEntries()[1]
+			Expect(*secondEntry).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				"Level":   Equal(logrus.InfoLevel),
+				"Message": Equal("Successfully processed cluster event"),
+				"Data": Equal(logrus.Fields{
+					"event":   ClusterUpdated,
+					"cluster": cluster.Name,
+				}),
+			}))
+
+			close(done)
+		})
+	})
+
+	When("cluster is deleted", func() {
+		It("event should be logged", func(done Done) {
+			var event controller.Event
+
+			ctx, cancelFunc := context.WithCancel(context.Background())
+			go clusterController.Run(ctx)
+			defer cancelFunc()
+
+			// Ignore added event
+			Eventually(eventsHook.GetEventsChan()).Should(Receive(&event))
+			logrusHook.Reset()
+			watcher.Delete(cluster)
+
+			// Wait for
+			Eventually(eventsHook.GetEventsChan()).Should(Receive(&event))
+			Expect(logrusHook.AllEntries()).To(HaveLen(2))
+
+			By("outputting on event received")
+			firstEntry := logrusHook.AllEntries()[0]
+			Expect(*firstEntry).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				"Level":   Equal(logrus.InfoLevel),
+				"Message": Equal("Received cluster event"),
+				"Data": Equal(logrus.Fields{
+					"cluster": cluster.Name,
+					"event":   ClusterDeleted,
+				}),
+			}))
+
+			By("outputting on event processed")
+			secondEntry := logrusHook.AllEntries()[1]
+			Expect(*secondEntry).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
+				"Level":   Equal(logrus.InfoLevel),
+				"Message": Equal("Successfully processed cluster event"),
+				"Data": Equal(logrus.Fields{
+					"cluster": cluster.Name,
+					"event":   ClusterDeleted,
+				}),
+			}))
+
+			close(done)
+		})
+	})
+})

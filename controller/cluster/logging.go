@@ -5,20 +5,22 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
-type clusterEvent string
+// Event represents an event processed by cluster controller.
+type Event string
 
+// Available event types.
 const (
-	clusterAdded   clusterEvent = "Added"
-	clusterUpdated clusterEvent = "Updated"
-	clusterDeleted clusterEvent = "Deleted"
+	ClusterAdded   Event = "Added"
+	ClusterUpdated Event = "Updated"
+	ClusterDeleted Event = "Deleted"
 )
 
-func logClusterEventBegin(cluster *crv1.MySQLCluster, event clusterEvent) {
+func logClusterEventBegin(cluster *crv1.MySQLCluster, event Event) {
 	logging.LogCluster(cluster).WithField(
 		"event", event).Info("Received cluster event")
 }
 
-func logClusterEventSuccess(cluster *crv1.MySQLCluster, event clusterEvent) {
+func logClusterEventSuccess(cluster *crv1.MySQLCluster, event Event) {
 	logging.LogCluster(cluster).WithField(
 		"event", event).Info("Successfully processed cluster event")
 }
