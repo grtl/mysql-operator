@@ -26,16 +26,20 @@ required = ["k8s.io/code-generator/cmd/client-gen"]
 
 # Tests only requirements
 [[constraint]]
-  name = "github.com/stretchr/testify"
-  version = "1.2.1"
+  name = "github.com/onsi/ginkgo"
+  branch = "master"
 
 [[constraint]]
+  name = "github.com/onsi/gomega"
   branch = "master"
+
+[[constraint]]
   name = "github.com/Pallinder/go-randomdata"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/nauyey/factory"
-  version = "0.1.0"
+  version = "0.2.0"
 
 [prune]
   go-tests = true

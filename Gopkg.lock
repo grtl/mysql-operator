@@ -172,8 +172,52 @@
     "def",
     "utils"
   ]
-  revision = "c0b8b26765105c65310285727f3ed2453e19c866"
-  version = "v0.1.0"
+  revision = "a3bf873c5a1323620b4bfaf180453093f3928b69"
+  version = "v0.2.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/onsi/ginkgo"
+  packages = [
+    ".",
+    "config",
+    "internal/codelocation",
+    "internal/containernode",
+    "internal/failer",
+    "internal/leafnodes",
+    "internal/remote",
+    "internal/spec",
+    "internal/spec_iterator",
+    "internal/specrunner",
+    "internal/suite",
+    "internal/testingtproxy",
+    "internal/writer",
+    "reporters",
+    "reporters/stenographer",
+    "reporters/stenographer/support/go-colorable",
+    "reporters/stenographer/support/go-isatty",
+    "types"
+  ]
+  revision = "9008c7b79f9636c46a0a945141020124702f0ecf"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/onsi/gomega"
+  packages = [
+    ".",
+    "format",
+    "internal/assertion",
+    "internal/asyncassertion",
+    "internal/oraclematcher",
+    "internal/testingtsupport",
+    "matchers",
+    "matchers/support/goraph/bipartitegraph",
+    "matchers/support/goraph/edge",
+    "matchers/support/goraph/node",
+    "matchers/support/goraph/util",
+    "types"
+  ]
+  revision = "de89e61d40b75aa971a9fc3eae7f4fefabd6e0ee"
 
 [[projects]]
   branch = "master"
@@ -229,6 +273,9 @@
   name = "golang.org/x/net"
   packages = [
     "context",
+    "html",
+    "html/atom",
+    "html/charset",
     "http2",
     "http2/hpack",
     "idna",
@@ -251,12 +298,24 @@
   packages = [
     "collate",
     "collate/build",
+    "encoding",
+    "encoding/charmap",
+    "encoding/htmlindex",
+    "encoding/internal",
+    "encoding/internal/identifier",
+    "encoding/japanese",
+    "encoding/korean",
+    "encoding/simplifiedchinese",
+    "encoding/traditionalchinese",
+    "encoding/unicode",
     "internal/colltab",
     "internal/gen",
     "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "internal/utf8internal",
     "language",
+    "runes",
     "secure/bidirule",
     "transform",
     "unicode/bidi",
@@ -503,6 +562,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5f52373f256d5e7b633eb233e1022390660bae4b4760ba8fdb12ee12297d126f"
+  inputs-digest = "5d940986a0ab9778267ca856fc287d3c7059c2a850e19ba3123f33cfad8a6820"
   solver-name = "gps-cdcl"
   solver-version = 1
