@@ -1,82 +1,79 @@
-package controller
+package controller_test
 
 import (
-	"testing"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 
-	"github.com/stretchr/testify/suite"
+	. "github.com/grtl/mysql-operator/controller"
 )
 
-type ControllerBaseHooksTestSuite struct {
-	suite.Suite
-	controller Base
-}
+var _ = Describe("Base", func() {
+	var (
+		controllerBase Base
+		hook           = NewEventsHook(1) // Any hook will do
+		anotherHook    = NewEventsHook(1) // Any hook will do
+	)
 
-func (suite *ControllerBaseHooksTestSuite) SetupTest() {
-	suite.controller = NewControllerBase()
-}
+	BeforeEach(func() {
+		controllerBase = NewControllerBase()
+	})
 
-func (suite *ControllerBaseHooksTestSuite) TestControllerBase_AddHook() {
-	suite.Require().Equal(0, len(suite.controller.hooks))
+	Describe("Adding hook", func() {
+		JustBeforeEach(func() {
+			err := controllerBase.AddHook(hook)
+			Expect(err).NotTo(HaveOccurred())
+		})
 
-	// Add hook
-	hook := NewEventsHook(1) // Any hook will do
-	err := suite.controller.AddHook(hook)
-	suite.Assert().Nil(err)
-	suite.Require().Equal(1, len(suite.controller.hooks))
+		Context("which is not in the hooks list", func() {
+			Context("to an empty hooks list", func() {
+				It("should add the hook to the list", func() {
+					Expect(len(controllerBase.GetHooks())).To(Equal(1))
+				})
+			})
+			Context("to an non empty hooks list", func() {
+				It("should add the hook to the list", func() {
+					err := controllerBase.AddHook(anotherHook)
+					Expect(err).NotTo(HaveOccurred())
+					Expect(len(controllerBase.GetHooks())).To(Equal(2))
+				})
+			})
+		})
 
-	// Hook already exists
-	err = suite.controller.AddHook(hook)
-	suite.Assert().NotNil(err)
-	suite.Require().Equal(1, len(suite.controller.hooks))
+		Context("which has already been added", func() {
+			It("should fail", func() {
+				err := controllerBase.AddHook(hook)
+				Expect(err).To(HaveOccurred())
+				Expect(len(controllerBase.GetHooks())).To(Equal(1))
+			})
+		})
+	})
 
-	// Add another hook
-	anotherHook := NewEventsHook(1) // Any hook will do
-	err = suite.controller.AddHook(anotherHook)
-	suite.Assert().Nil(err)
-	suite.Require().Equal(2, len(suite.controller.hooks))
-}
+	Describe("Removing hook", func() {
+		BeforeEach(func() {
+			err := controllerBase.AddHook(hook)
+			Expect(err).NotTo(HaveOccurred())
+			err = controllerBase.AddHook(anotherHook)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(len(controllerBase.GetHooks())).To(Equal(2))
+		})
 
-func (suite *ControllerBaseHooksTestSuite) TestControllerBase_RemoveHook() {
-	hook := NewEventsHook(1)
-	anotherHook := NewEventsHook(1)
-	err := suite.controller.AddHook(hook)
-	suite.Assert().Nil(err)
-	err = suite.controller.AddHook(anotherHook)
-	suite.Assert().Nil(err)
-	suite.Require().Equal(2, len(suite.controller.hooks))
+		JustBeforeEach(func() {
+			err := controllerBase.RemoveHook(hook)
+			Expect(err).NotTo(HaveOccurred())
+		})
 
-	// Remove hook
-	err = suite.controller.RemoveHook(hook)
-	suite.Assert().Nil(err)
-	suite.Require().Equal(1, len(suite.controller.hooks))
+		Context("which is in the hooks list", func() {
+			It("should remove the hook from the list", func() {
+				Expect(len(controllerBase.GetHooks())).To(Equal(1))
+			})
+		})
 
-	// Try to remove the same hook again
-	err = suite.controller.RemoveHook(hook)
-	suite.Assert().NotNil(err)
-	suite.Require().Equal(1, len(suite.controller.hooks))
-
-	// Remove another hook
-	err = suite.controller.RemoveHook(anotherHook)
-	suite.Assert().Nil(err)
-	suite.Require().Equal(0, len(suite.controller.hooks))
-}
-
-func (suite *ControllerBaseHooksTestSuite) TestControllerBase_GetHooks() {
-	hook := NewEventsHook(1)
-	anotherHook := NewEventsHook(1)
-	err := suite.controller.AddHook(hook)
-	suite.Assert().Nil(err)
-	err = suite.controller.AddHook(anotherHook)
-	suite.Assert().Nil(err)
-	suite.Require().Equal(2, len(suite.controller.hooks))
-
-	hooks := suite.controller.GetHooks()
-	suite.Require().Equal(2, len(hooks))
-	suite.Assert().Contains(hooks, hook)
-	suite.Assert().Contains(hooks, anotherHook)
-	suite.Require().Equal(hooks, suite.controller.hooks)
-}
-
-func TestControllerBaseHooksTestSuite(t *testing.T) {
-	suite.Run(t, new(ControllerBaseHooksTestSuite))
-}
+		Context("which has already been removed", func() {
+			It("should fail", func() {
+				err := controllerBase.RemoveHook(hook)
+				Expect(err).To(HaveOccurred())
+				Expect(len(controllerBase.GetHooks())).To(Equal(1))
+			})
+		})
+	})
+})
