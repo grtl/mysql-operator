@@ -45,15 +45,15 @@ func (c *clusterController) Run(ctx context.Context) error {
 func (c *clusterController) onAdd(obj interface{}) {
 	cluster := obj.(*crv1.MySQLCluster)
 
-	logClusterEventBegin(cluster, clusterAdded)
+	logClusterEventBegin(cluster, ClusterAdded)
 
 	err := c.clusterOperator.AddCluster(cluster)
 	if err != nil {
-		logging.LogCluster(cluster).WithField("event", clusterAdded).Error(err)
+		logging.LogCluster(cluster).WithField("event", ClusterAdded).Error(err)
 		return
 	}
 
-	logClusterEventSuccess(cluster, clusterAdded)
+	logClusterEventSuccess(cluster, ClusterAdded)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {
@@ -64,9 +64,9 @@ func (c *clusterController) onAdd(obj interface{}) {
 func (c *clusterController) onUpdate(oldObj, newObj interface{}) {
 	newCluster := newObj.(*crv1.MySQLCluster)
 
-	logClusterEventBegin(newCluster, clusterUpdated)
+	logClusterEventBegin(newCluster, ClusterUpdated)
 
-	logClusterEventSuccess(newCluster, clusterUpdated)
+	logClusterEventSuccess(newCluster, ClusterUpdated)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {
@@ -77,9 +77,9 @@ func (c *clusterController) onUpdate(oldObj, newObj interface{}) {
 func (c *clusterController) onDelete(obj interface{}) {
 	cluster := obj.(*crv1.MySQLCluster)
 
-	logClusterEventBegin(cluster, clusterDeleted)
+	logClusterEventBegin(cluster, ClusterDeleted)
 
-	logClusterEventSuccess(cluster, clusterDeleted)
+	logClusterEventSuccess(cluster, ClusterDeleted)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {
