@@ -1,82 +1,66 @@
-package controller
+package controller_test
 
 import (
-	"testing"
-	"time"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	. "github.com/grtl/mysql-operator/controller"
 
 	"github.com/nauyey/factory"
-	"github.com/stretchr/testify/suite"
 
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	testingFactory "github.com/grtl/mysql-operator/testing/factory"
 )
 
-type EventsHookTestSuite struct {
-	suite.Suite
-	eventsHook EventsHook
-	cluster    *crv1.MySQLCluster
-}
+var _ = Describe("Events", func() {
+	var (
+		eventsHook EventsHook
+		cluster    *crv1.MySQLCluster
+	)
 
-type eventTest func(Event)
-
-const TIMEOUT = time.Second * 1
-
-func (suite *EventsHookTestSuite) testWithTimeout(test eventTest) {
-	select {
-	case event := <-suite.eventsHook.GetEventsChan():
-		test(event)
-	case <-time.After(TIMEOUT):
-		suite.Fail("Timeout while waiting for event")
-	}
-}
-
-func (suite *EventsHookTestSuite) SetupTest() {
-	suite.eventsHook = NewEventsHook(16)
-
-	suite.cluster = &crv1.MySQLCluster{}
-	err := factory.Build(testingFactory.MySQLClusterFactory).To(suite.cluster)
-	suite.Require().Nil(err)
-}
-
-func (suite *EventsHookTestSuite) TestEventsHook_OnAdd() {
-	suite.eventsHook.OnAdd(suite.cluster)
-	suite.testWithTimeout(func(event Event) {
-		suite.Assert().Equal(EventAdded, event.Type)
-		suite.Assert().Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
+	BeforeEach(func() {
+		eventsHook = NewEventsHook(16)
+		cluster = new(crv1.MySQLCluster)
+		err := factory.Build(testingFactory.MySQLClusterFactory).To(cluster)
+		Expect(err).NotTo(HaveOccurred())
 	})
-}
 
-func (suite *EventsHookTestSuite) TestEventsHook_OnUpdate() {
-	suite.eventsHook.OnUpdate(suite.cluster)
-	suite.testWithTimeout(func(event Event) {
-		suite.Assert().Equal(EventUpdated, event.Type)
-		suite.Assert().Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
+	Describe("Adding cluster object", func() {
+		It("should append EventAdded with cluster object to the events channel", func(done Done) {
+			go eventsHook.OnAdd(cluster)
+			Expect(<-eventsHook.GetEventsChan()).To(Equal(Event{
+				Type:   EventAdded,
+				Object: cluster,
+			}))
+			close(done)
+		})
 	})
-}
 
-func (suite *EventsHookTestSuite) TestEventsHook_OnDelete() {
-	suite.eventsHook.OnDelete(suite.cluster)
-	suite.testWithTimeout(func(event Event) {
-		suite.Assert().Equal(EventDeleted, event.Type)
-		suite.Assert().Equal(suite.cluster, event.Object.(*crv1.MySQLCluster))
+	Describe("Updating cluster object", func() {
+		It("should append EventUpdated with cluster object to the events channel", func(done Done) {
+			go eventsHook.OnUpdate(cluster)
+			Expect(<-eventsHook.GetEventsChan()).To(Equal(Event{
+				Type:   EventUpdated,
+				Object: cluster,
+			}))
+			close(done)
+		})
 	})
-}
 
-func (suite *EventsHookTestSuite) TestEventsHook_GetEventsChan() {
-	eventsChan := suite.eventsHook.GetEventsChan()
-	suite.Require().NotNil(eventsChan)
-
-	hook, ok := suite.eventsHook.(*eventsHook)
-	suite.Assert().True(ok)
-
-	event := Event{Type: EventAdded, Object: suite.cluster}
-	hook.events <- event
-
-	suite.testWithTimeout(func(clusterEvent Event) {
-		suite.Require().Equal(event, clusterEvent)
+	Describe("Deleting cluster object", func() {
+		It("should append EventDeleted with cluster object to the events channel", func(done Done) {
+			go eventsHook.OnDelete(cluster)
+			Expect(<-eventsHook.GetEventsChan()).To(Equal(Event{
+				Type:   EventDeleted,
+				Object: cluster,
+			}))
+			close(done)
+		})
 	})
-}
 
-func TestEventsHookTestSuite(t *testing.T) {
-	suite.Run(t, new(EventsHookTestSuite))
-}
+	Describe("Getting events channel", func() {
+		It("should not be nil", func() {
+			Expect(eventsHook.GetEventsChan()).ToNot(BeNil())
+		})
+	})
+})
