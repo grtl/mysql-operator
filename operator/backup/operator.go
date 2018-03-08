@@ -1,14 +1,14 @@
 package backup
 
 import (
-"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes"
 
-crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
+	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
 // Operator represents an object to manipulate Backup custom resources.
 type Operator interface {
-	ScheduleBackup(cluster *crv1.MySQLBackup) error
+	ScheduleBackup(backup *crv1.MySQLBackup) error
 }
 
 type backupOperator struct {
@@ -22,6 +22,7 @@ func NewBackupOperator(clientset kubernetes.Interface) Operator {
 	}
 }
 
-func (c *backupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
+func (b *backupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
+	//TODO: implement backup scheduling
 	return nil
 }
