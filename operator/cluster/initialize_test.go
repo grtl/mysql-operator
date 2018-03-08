@@ -6,6 +6,6 @@ import (
 	//. "github.com/grtl/mysql-operator/operator/cluster"
 )
 
-var _ = Describe("Operator", func() {
+var _ = Describe("Initialize", func() {
 
 })

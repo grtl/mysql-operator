@@ -6,6 +6,6 @@ import (
 	//. "github.com/grtl/mysql-operator/operator/backup"
 )
 
-var _ = Describe("Operator", func() {
+var _ = Describe("Fake", func() {
 
 })
