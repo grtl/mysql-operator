@@ -206,6 +206,8 @@
   packages = [
     ".",
     "format",
+    "gstruct",
+    "gstruct/errors",
     "internal/assertion",
     "internal/asyncassertion",
     "internal/oraclematcher",
@@ -232,12 +234,6 @@
   version = "v2.0.1"
 
 [[projects]]
-  name = "github.com/pmezard/go-difflib"
-  packages = ["difflib"]
-  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
-  version = "v1.0.0"
-
-[[projects]]
   name = "github.com/sirupsen/logrus"
   packages = [
     ".",
@@ -251,16 +247,6 @@
   packages = ["."]
   revision = "e57e3eeb33f795204c1ca35f56c44f83227c6e66"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/stretchr/testify"
-  packages = [
-    "assert",
-    "require",
-    "suite"
-  ]
-  revision = "12b6f73e6084dad08a7c6e575284b177ecafbc71"
-  version = "v1.2.1"
 
 [[projects]]
   branch = "master"
@@ -562,6 +548,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5d940986a0ab9778267ca856fc287d3c7059c2a850e19ba3123f33cfad8a6820"
+  inputs-digest = "321372acaf8d2eb1304575c77311b7b8ab4aa3bbda7559567c3f7eca30bfc96a"
   solver-name = "gps-cdcl"
   solver-version = 1
