@@ -5,20 +5,22 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
-type backupEvent string
+// Event represents an event processed by backup controller.
+type Event string
 
+// Available event types.
 const (
-	backupAdded   backupEvent = "Added"
-	backupUpdated backupEvent = "Updated"
-	backupDeleted backupEvent = "Deleted"
+	BackupAdded   Event = "Added"
+	BackupUpdated Event = "Updated"
+	BackupDeleted Event = "Deleted"
 )
 
-func logBackupEventBegin(backup *crv1.MySQLBackup, event backupEvent) {
+func logBackupEventBegin(backup *crv1.MySQLBackup, event Event) {
 	logging.LogBackup(backup).WithField(
 		"event", event).Info("Received backup event")
 }
 
-func logBackupEventSuccess(backup *crv1.MySQLBackup, event backupEvent) {
+func logBackupEventSuccess(backup *crv1.MySQLBackup, event Event) {
 	logging.LogBackup(backup).WithField(
 		"event", event).Info("Successfully processed backup event")
 }
