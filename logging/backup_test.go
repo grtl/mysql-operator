@@ -1,13 +1,14 @@
-package logging
+package logging_test
 
 import (
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
+
+	. "github.com/grtl/mysql-operator/logging"
+
 	"io/ioutil"
-	"testing"
 
 	"github.com/nauyey/factory"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-
 	"github.com/sirupsen/logrus"
 	"github.com/sirupsen/logrus/hooks/test"
 
@@ -15,49 +16,71 @@ import (
 	testingFactory "github.com/grtl/mysql-operator/testing/factory"
 )
 
-func TestLogBackup(t *testing.T) {
+var _ = Describe("Backup", func() {
 	// Turn off logging output
 	logrus.SetOutput(ioutil.Discard)
 
-	// Initialize logging hook
-	logrusHook := test.NewGlobal()
-	logrus.SetLevel(logrus.DebugLevel)
+	var (
+		logrusHook *test.Hook
+		backup     *crv1.MySQLBackup
+	)
 
-	// Create fake backup
-	backup := new(crv1.MySQLBackup)
-	err := factory.Build(testingFactory.MySQLBackupFactory).To(backup)
-	require.Nil(t, err)
+	BeforeEach(func() {
+		// Initialize logging hook
+		logrusHook = test.NewGlobal()
+		logrus.SetLevel(logrus.DebugLevel)
 
-	// Debug level
-	LogBackup(backup).Debug("Debug")
-	require.Equal(t, 1, len(logrusHook.AllEntries()))
-	assert.Equal(t, logrus.DebugLevel, logrusHook.LastEntry().Level)
-	assert.Equal(t, "Debug", logrusHook.LastEntry().Message)
-	assert.Equal(t, logrus.Fields{
-		"backup": backup.Name,
-	}, logrusHook.LastEntry().Data)
+		// Setup fake backup
+		backup = new(crv1.MySQLBackup)
+		err := factory.Build(testingFactory.MySQLBackupFactory).To(backup)
+		Expect(err).NotTo(HaveOccurred())
+	})
 
-	LogBackup(backup).Info("Info")
-	require.Equal(t, 2, len(logrusHook.AllEntries()))
-	assert.Equal(t, logrus.InfoLevel, logrusHook.LastEntry().Level)
-	assert.Equal(t, "Info", logrusHook.LastEntry().Message)
-	assert.Equal(t, logrus.Fields{
-		"backup": backup.Name,
-	}, logrusHook.LastEntry().Data)
+	Context("Debug", func() {
+		It("should log with debug level", func() {
+			LogBackup(backup).Debug("Debug")
+			Expect(logrusHook.Entries).To(HaveLen(1))
+			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.DebugLevel))
+			Expect(logrusHook.LastEntry().Message).To(Equal("Debug"))
+			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
+				"backup": backup.Name,
+			}))
+		})
+	})
 
-	LogBackup(backup).Warn("Warning")
-	require.Equal(t, 3, len(logrusHook.AllEntries()))
-	assert.Equal(t, logrus.WarnLevel, logrusHook.LastEntry().Level)
-	assert.Equal(t, "Warning", logrusHook.LastEntry().Message)
-	assert.Equal(t, logrus.Fields{
-		"backup": backup.Name,
-	}, logrusHook.LastEntry().Data)
+	Context("Info", func() {
+		It("should log with info level", func() {
+			LogBackup(backup).Info("Info")
+			Expect(logrusHook.Entries).To(HaveLen(1))
+			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.InfoLevel))
+			Expect(logrusHook.LastEntry().Message).To(Equal("Info"))
+			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
+				"backup": backup.Name,
+			}))
+		})
+	})
 
-	LogBackup(backup).Error("Error")
-	require.Equal(t, 4, len(logrusHook.AllEntries()))
-	assert.Equal(t, logrus.ErrorLevel, logrusHook.LastEntry().Level)
-	assert.Equal(t, "Error", logrusHook.LastEntry().Message)
-	assert.Equal(t, logrus.Fields{
-		"backup": backup.Name,
-	}, logrusHook.LastEntry().Data)
-}
+	Context("Warn", func() {
+		It("should log with warn level", func() {
+			LogBackup(backup).Warn("Warn")
+			Expect(logrusHook.Entries).To(HaveLen(1))
+			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.WarnLevel))
+			Expect(logrusHook.LastEntry().Message).To(Equal("Warn"))
+			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
+				"backup": backup.Name,
+			}))
+		})
+	})
+
+	Context("Error", func() {
+		It("should log with error level", func() {
+			LogBackup(backup).Error("Error")
+			Expect(logrusHook.Entries).To(HaveLen(1))
+			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.ErrorLevel))
+			Expect(logrusHook.LastEntry().Message).To(Equal("Error"))
+			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
+				"backup": backup.Name,
+			}))
+		})
+	})
+})
