@@ -3,6 +3,7 @@ package backup
 import (
 	"context"
 
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
 
 	"github.com/grtl/mysql-operator/controller"
@@ -10,7 +11,6 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/pkg/client/informers/externalversions"
-	"k8s.io/client-go/kubernetes"
 )
 
 // NewBackupController returns new backup controller.
@@ -44,14 +44,14 @@ func (c *backupController) Run(ctx context.Context) error {
 func (c *backupController) onAdd(obj interface{}) {
 	backup := obj.(*crv1.MySQLBackup)
 
-	logBackupEventBegin(backup, backupAdded)
+	logBackupEventBegin(backup, BackupAdded)
 
 	err := c.backupOperator.ScheduleBackup(backup)
 	if err != nil {
 		return
 	}
 
-	logBackupEventSuccess(backup, backupAdded)
+	logBackupEventSuccess(backup, BackupAdded)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {
@@ -62,9 +62,9 @@ func (c *backupController) onAdd(obj interface{}) {
 func (c *backupController) onUpdate(oldObj, newObj interface{}) {
 	newBackup := newObj.(*crv1.MySQLBackup)
 
-	logBackupEventBegin(newBackup, backupUpdated)
+	logBackupEventBegin(newBackup, BackupUpdated)
 
-	logBackupEventSuccess(newBackup, backupUpdated)
+	logBackupEventSuccess(newBackup, BackupUpdated)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {
@@ -75,9 +75,9 @@ func (c *backupController) onUpdate(oldObj, newObj interface{}) {
 func (c *backupController) onDelete(obj interface{}) {
 	backup := obj.(*crv1.MySQLBackup)
 
-	logBackupEventBegin(backup, backupDeleted)
+	logBackupEventBegin(backup, BackupDeleted)
 
-	logBackupEventSuccess(backup, backupDeleted)
+	logBackupEventSuccess(backup, BackupDeleted)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {
