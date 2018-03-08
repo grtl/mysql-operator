@@ -25,6 +25,7 @@ const (
 type Operator interface {
 	// AddCluster creates the Kubernetes API objects necessary for a MySQL cluster.
 	AddCluster(cluster *crv1.MySQLCluster) error
+	UpdateCluster(oldCluster, newCluster *crv1.MySQLCluster) error
 }
 
 type clusterOperator struct {
@@ -69,6 +70,12 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 		removeErr = c.removeReadService(cluster)
 		return errors.NewAggregate([]error{err, removeErr})
 	}
+
+	return nil
+}
+
+func (c *clusterOperator) UpdateCluster(oldCluster, newCluster *crv1.MySQLCluster) error {
+	logging.LogCluster(newCluster).Debug("Updating cluster.")
 
 	return nil
 }
