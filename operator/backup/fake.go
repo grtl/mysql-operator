@@ -1,7 +1,7 @@
 package backup
 
 import (
-crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
+	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
 type fakeBackupOperator struct{}
@@ -11,8 +11,7 @@ func NewFakeOperator() Operator {
 	return new(fakeBackupOperator)
 }
 
-func (c *fakeBackupOperator) ScheduleBackup(cluster *crv1.MySQLBackup) error {
+func (b *fakeBackupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
 	// Just pretend we're scheduling backup. Do nothing.
 	return nil
 }
-
