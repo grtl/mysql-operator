@@ -22,3 +22,8 @@ func (c *FakeClusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 func (c *FakeClusterOperator) SetError(err error) {
 	c.err = err
 }
+
+func (c *FakeClusterOperator) UpdateCluster(oldCluster, newCluster *crv1.MySQLCluster) error {
+	// Just pretend we're updating a cluster. Do nothing.
+	return c.err
+}
