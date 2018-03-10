@@ -18,11 +18,8 @@ type MySQLBackup struct {
 
 // MySQLBackupSpec stores the properties of a MySQL cluster backup.
 type MySQLBackupSpec struct {
-<<<<<<< Updated upstream
-=======
 	Cluster string `json:"cluster"`
 	Time    string `json:"time"`
->>>>>>> Stashed changes
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
