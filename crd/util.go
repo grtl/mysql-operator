@@ -17,8 +17,8 @@ import (
 
 // waitForCRDEstablished stops the execution until Custom Resource Definition
 // is registered or a timeout occurs.
-func waitForCRDEstablished(clientset *apiextensions.Clientset, CRDName string) error {
-	return wait.Poll(500*time.Millisecond, 60*time.Second, func() (bool, error) {
+func waitForCRDEstablished(clientset apiextensions.Interface, CRDName string) error {
+	return wait.Poll(250*time.Millisecond, 30*time.Second, func() (bool, error) {
 		crd, err := clientset.ApiextensionsV1beta1().CustomResourceDefinitions().Get(CRDName, metav1.GetOptions{})
 		if err != nil {
 			return false, err
@@ -41,7 +41,7 @@ func waitForCRDEstablished(clientset *apiextensions.Clientset, CRDName string) e
 }
 
 // createCRD registers given custom resource definition into the kubernetes api.
-func createCRD(clientset *apiextensions.Clientset, filename string) error {
+func createCRD(clientset apiextensions.Interface, filename string) error {
 	crd := new(apiextensionsv1.CustomResourceDefinition)
 	err := util.ObjectFromFile(filename, crd)
 	if err != nil {
@@ -58,7 +58,7 @@ func createCRD(clientset *apiextensions.Clientset, filename string) error {
 		return err
 	}
 
-	err = waitForCRDEstablished(clientset, crd.ObjectMeta.Name)
+	err = waitForCRDEstablished(clientset, crd.Name)
 	if err != nil {
 		deleteErr := crdInterface.Delete(crd.ObjectMeta.Name, nil)
 		return errors.NewAggregate([]error{err, deleteErr})
