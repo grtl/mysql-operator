@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -18,8 +19,9 @@ type MySQLBackup struct {
 
 // MySQLBackupSpec stores the properties of a MySQL cluster backup.
 type MySQLBackupSpec struct {
-	Cluster string `json:"cluster"`
-	Time    string `json:"time"`
+	Cluster string            `json:"cluster"`
+	Time    string            `json:"time"`
+	Storage resource.Quantity `json:"storage"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
