@@ -4,13 +4,19 @@ import (
 	"bytes"
 	"text/template"
 
+	"github.com/grtl/mysql-operator/artifacts"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 // ObjectFromTemplate executes Go template with given source object and
 // parses the result into the destination object structure.
 func ObjectFromTemplate(source interface{}, destination interface{}, templateFile string) error {
-	tmpl, err := template.ParseFiles(templateFile)
+	assetBytes, err := artifacts.Asset(templateFile)
+	if err != nil {
+		return err
+	}
+
+	tmpl, err := template.New("").Parse(string(assetBytes))
 	if err != nil {
 		return err
 	}

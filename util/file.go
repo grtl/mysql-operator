@@ -1,17 +1,17 @@
 package util
 
 import (
-	"os"
-
+	"bytes"
+	"github.com/grtl/mysql-operator/artifacts"
 	"k8s.io/apimachinery/pkg/util/yaml"
 )
 
 // ObjectFromFile creates a kubernetes object from a yaml file.
 func ObjectFromFile(filename string, destination interface{}) error {
-	f, err := os.Open(filename)
+	assetBytes, err := artifacts.Asset(filename)
 	if err != nil {
 		return err
 	}
-
-	return yaml.NewYAMLOrJSONDecoder(f, 32).Decode(destination)
+	reader := bytes.NewReader(assetBytes)
+	return yaml.NewYAMLOrJSONDecoder(reader, 32).Decode(destination)
 }

@@ -8,6 +8,7 @@ go:
 install:
   - go get github.com/mattn/goveralls github.com/modocache/gover
   - go get -u github.com/onsi/ginkgo/ginkgo
+  - go get -u github.com/jteeuwen/go-bindata/...
   - .travis-scripts/install-minikube.sh
 
 before_script:
@@ -16,6 +17,7 @@ before_script:
 script:
   - .travis-scripts/format.sh
   - hack/verify-codegen.sh
+  - hack/verify-artifacts.sh
   - .travis-scripts/build.sh
   - .travis-scripts/test.sh
 
