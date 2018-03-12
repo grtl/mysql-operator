@@ -3,9 +3,9 @@ kind: CronJob
 metadata:
   name: {{ .Name }}-job
   ownerReferences:
-    - kind: MySQLCluster
+    - kind: MySQLBackup
       apiVersion: cr.mysqloperator.grtl.github.com/v1
-      name: {{ .Spec.Cluster }}
+      name: {{ .Name }}
       uid: {{ .UID }}
 spec:
   schedule: "{{ .Spec.Time }}"

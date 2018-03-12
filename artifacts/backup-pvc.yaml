@@ -4,7 +4,7 @@ metadata:
   name: {{ .Name }}
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
-      storage: 1Gi
+      storage: {{ .Spec.Storage }}

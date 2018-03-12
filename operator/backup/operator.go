@@ -1,19 +1,23 @@
 package backup
 
 import (
-	"github.com/grtl/mysql-operator/logging"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
-	"github.com/grtl/mysql-operator/util"
-	"k8s.io/api/batch/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/client-go/kubernetes"
-	"fmt"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/errors"
+
+	"k8s.io/api/batch/v1beta1"
 	"k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
+
+	"github.com/grtl/mysql-operator/logging"
+	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
+	"github.com/grtl/mysql-operator/util"
 )
 
 const (
 	cronJobTemplate = "artifacts/backup-cronjob.yaml"
-	pvcTemplate = "artifacts/backup-pvc.yaml"
+	pvcTemplate     = "artifacts/backup-pvc.yaml"
 )
 
 // Operator represents an object to manipulate Backup custom resources.
@@ -22,24 +26,27 @@ type Operator interface {
 }
 
 type backupOperator struct {
-	clientset kubernetes.Interface
+	clientset    kubernetes.Interface
+	verClientset versioned.Interface
 }
 
 // NewBackupOperator returns a new Operator.
-func NewBackupOperator(clientset kubernetes.Interface) Operator {
+func NewBackupOperator(verClientset versioned.Interface, clientset kubernetes.Interface) Operator {
 	return &backupOperator{
-		clientset: clientset,
+		clientset:    clientset,
+		verClientset: verClientset,
 	}
 }
 
 func (b *backupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
-	//TODO: error if cluster doesn't exist
-	//TODO: implement OneTime backups
-	//TODO: PVC storage, PVC overriding
-	//TODO: Default name if not provided
+	clusterName := backup.Spec.Cluster
+	_, err := b.verClientset.CrV1().MySQLClusters(metav1.NamespaceDefault).Get(clusterName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
 
 	logging.LogBackup(backup).Debug("Creating PVC.")
-	err := b.createPVC(backup)
+	err = b.createPVC(backup)
 	if err != nil {
 		return err
 	}
@@ -47,8 +54,10 @@ func (b *backupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
 	logging.LogBackup(backup).Debug("Creating cron job.")
 	err = b.createCronJob(backup)
 	if err != nil {
-		//TODO: remove PVC
-		return err
+		// Cleanup - remove already created PVC
+		logging.LogBackup(backup).WithField("error", err).Warn("Reverting PVC creation.")
+		removeErr := b.removePVC(backup)
+		return errors.NewAggregate([]error{err, removeErr})
 	}
 
 	return nil
@@ -58,7 +67,6 @@ func (b *backupOperator) createPVC(backup *crv1.MySQLBackup) error {
 	pvcInterface := b.clientset.CoreV1().PersistentVolumeClaims(backup.Namespace)
 	pvc, err := pvcForBackup(backup)
 	if err != nil {
-		logging.LogBackup(backup).Debug("PVC error: " + fmt.Sprint(err))
 		return err
 	}
 
@@ -76,7 +84,6 @@ func (b *backupOperator) createCronJob(backup *crv1.MySQLBackup) error {
 	cronJobInterface := b.clientset.BatchV1beta1().CronJobs(backup.Namespace)
 	cronJob, err := cronJobForBackup(backup)
 	if err != nil {
-		logging.LogBackup(backup).Debug("Cron job error: " + fmt.Sprint(err))
 		return err
 	}
 
@@ -100,4 +107,9 @@ func cronJobForBackup(backup *crv1.MySQLBackup) (*v1beta1.CronJob, error) {
 	cronJob := new(v1beta1.CronJob)
 	err := util.ObjectFromTemplate(backup, cronJob, cronJobTemplate)
 	return cronJob, err
+}
+
+func (b *backupOperator) removePVC(backup *crv1.MySQLBackup) error {
+	pvcInterface := b.clientset.CoreV1().Services(backup.Namespace)
+	return pvcInterface.Delete(backup.Name, new(metav1.DeleteOptions))
 }

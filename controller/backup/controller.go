@@ -18,7 +18,7 @@ func NewBackupController(clientset versioned.Interface, kubeClientset kubernetes
 	return &backupController{
 		Base:           controller.NewControllerBase(),
 		clientset:      clientset,
-		backupOperator: operator.NewBackupOperator(kubeClientset),
+		backupOperator: operator.NewBackupOperator(clientset, kubeClientset),
 	}
 }
 
