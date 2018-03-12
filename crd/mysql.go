@@ -10,11 +10,11 @@ const (
 )
 
 // CreateClusterCRD registers a MySQLCluster custom resource in kubernetes api.
-func CreateClusterCRD(clientset *apiextensions.Clientset) error {
+func CreateClusterCRD(clientset apiextensions.Interface) error {
 	return createCRD(clientset, clusterDefinitionFilename)
 }
 
 // CreateBackupCRD registers a MySQLBackup custom resource in kubernetes api.
-func CreateBackupCRD(clientset *apiextensions.Clientset) error {
+func CreateBackupCRD(clientset apiextensions.Interface) error {
 	return createCRD(clientset, backupDefinitionFilename)
 }
