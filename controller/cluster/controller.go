@@ -50,10 +50,9 @@ func (c *clusterController) onAdd(obj interface{}) {
 	err := c.clusterOperator.AddCluster(cluster)
 	if err != nil {
 		logging.LogCluster(cluster).WithField("event", ClusterAdded).Error(err)
-		return
+	} else {
+		logClusterEventSuccess(cluster, ClusterAdded)
 	}
-
-	logClusterEventSuccess(cluster, ClusterAdded)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {

@@ -4,14 +4,21 @@ import (
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
-type fakeClusterOperator struct{}
-
-// NewFakeOperator returns new operator that does nothing.
-func NewFakeOperator() Operator {
-	return new(fakeClusterOperator)
+type FakeClusterOperator struct {
+	err error
 }
 
-func (c *fakeClusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
-	// Just pretend we're adding a cluster. Do nothing.
-	return nil
+// NewFakeOperator returns new operator that does nothing.
+func NewFakeOperator() *FakeClusterOperator {
+	return new(FakeClusterOperator)
+}
+
+func (c *FakeClusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
+	// Just pretend we're adding a cluster. Return err.
+	return c.err
+}
+
+// SetError can be used to simulate operator failures.
+func (c *FakeClusterOperator) SetError(err error) {
+	c.err = err
 }
