@@ -25,7 +25,7 @@ const (
 type Operator interface {
 	// AddCluster creates the Kubernetes API objects necessary for a MySQL cluster.
 	AddCluster(cluster *crv1.MySQLCluster) error
-	UpdateCluster(oldCluster, newCluster *crv1.MySQLCluster) error
+	UpdateCluster(newCluster *crv1.MySQLCluster) error
 }
 
 type clusterOperator struct {
@@ -74,10 +74,9 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 	return nil
 }
 
-func (c *clusterOperator) UpdateCluster(oldCluster, newCluster *crv1.MySQLCluster) error {
-	logging.LogCluster(newCluster).Debug("Updating cluster.")
-
-	return nil
+func (c *clusterOperator) UpdateCluster(newCluster *crv1.MySQLCluster) error {
+	logging.LogCluster(newCluster).Debug("Updating stateful set.")
+	return c.updateStatefulSet(newCluster)
 }
 
 func (c *clusterOperator) createService(cluster *crv1.MySQLCluster, filename string) error {
@@ -112,6 +111,18 @@ func (c *clusterOperator) createStatefulSet(cluster *crv1.MySQLCluster) error {
 	}
 
 	return nil
+}
+
+func (c *clusterOperator) updateStatefulSet(cluster *crv1.MySQLCluster) error {
+	statefulSetInterface := c.clientset.AppsV1().StatefulSets(cluster.Namespace)
+	statefulSet, err := statefulSetForCluster(cluster)
+	if err != nil {
+		return err
+	}
+
+	_, err = statefulSetInterface.Update(statefulSet)
+
+	return err
 }
 
 func serviceForCluster(cluster *crv1.MySQLCluster, filename string) (*corev1.Service, error) {
