@@ -61,12 +61,11 @@ func (c *clusterController) onAdd(obj interface{}) {
 }
 
 func (c *clusterController) onUpdate(oldObj, newObj interface{}) {
-	oldCluster := oldObj.(*crv1.MySQLCluster)
 	newCluster := newObj.(*crv1.MySQLCluster)
 
 	logClusterEventBegin(newCluster, ClusterUpdated)
 
-	err := c.clusterOperator.UpdateCluster(oldCluster, newCluster)
+	err := c.clusterOperator.UpdateCluster(newCluster)
 	if err != nil {
 		logging.LogCluster(newCluster).WithField("event", ClusterUpdated).Error(err)
 	} else {
