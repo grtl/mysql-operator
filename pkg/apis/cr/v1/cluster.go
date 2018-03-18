@@ -14,7 +14,8 @@ type MySQLCluster struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Spec MySQLClusterSpec `json:"spec"`
+	Spec   MySQLClusterSpec   `json:"spec"`
+	Status MySQLClusterStatus `json:"status,omitempty"`
 }
 
 // MySQLClusterSpec stores the properties of a MySQL Cluster.
@@ -23,6 +24,11 @@ type MySQLClusterSpec struct {
 	Storage    resource.Quantity `json:"storage"`
 	Replicas   int32             `json:"replicas"`
 	FromBackup BackupInstance    `json:"fromBackup,omitempty"`
+}
+
+type MySQLClusterStatus struct {
+	State   string `json:"state,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

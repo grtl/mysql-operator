@@ -12,6 +12,7 @@ import (
 
 	"github.com/grtl/mysql-operator/logging"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
+	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/util"
 )
 
@@ -29,13 +30,15 @@ type Operator interface {
 }
 
 type clusterOperator struct {
-	clientset kubernetes.Interface
+	clientset     versioned.Interface
+	kubeClientset kubernetes.Interface
 }
 
 // NewClusterOperator returns a new Operator.
-func NewClusterOperator(clientset kubernetes.Interface) Operator {
+func NewClusterOperator(clientset versioned.Interface, kubeClientset kubernetes.Interface) Operator {
 	return &clusterOperator{
-		clientset: clientset,
+		clientset:     clientset,
+		kubeClientset: kubeClientset,
 	}
 }
 
@@ -76,11 +79,32 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 
 func (c *clusterOperator) UpdateCluster(newCluster *crv1.MySQLCluster) error {
 	logging.LogCluster(newCluster).Debug("Updating stateful set.")
-	return c.updateStatefulSet(newCluster)
+	err := c.updateStatefulSet(newCluster)
+	if err != nil {
+		logging.LogCluster(newCluster).WithField(
+			"error", err).Warn("Setting status")
+		setStateErr := c.setClusterState(
+			newCluster,
+			"Failed update",
+			"The provided patch resulted in a StatefulSet update failure",
+		)
+		return errors.NewAggregate([]error{err, setStateErr})
+	}
+
+	return c.setClusterState(newCluster, "Successful update", "")
+}
+
+func (c *clusterOperator) setClusterState(cluster *crv1.MySQLCluster, state, message string) error {
+	cluster.Status.State = state
+	cluster.Status.Message = message
+	_, updateErr := c.clientset.CrV1().
+		MySQLClusters(cluster.ObjectMeta.Namespace).Update(cluster)
+
+	return updateErr
 }
 
 func (c *clusterOperator) createService(cluster *crv1.MySQLCluster, filename string) error {
-	serviceInterface := c.clientset.CoreV1().Services(cluster.Namespace)
+	serviceInterface := c.kubeClientset.CoreV1().Services(cluster.Namespace)
 	service, err := serviceForCluster(cluster, filename)
 	if err != nil {
 		return err
@@ -97,7 +121,7 @@ func (c *clusterOperator) createService(cluster *crv1.MySQLCluster, filename str
 }
 
 func (c *clusterOperator) createStatefulSet(cluster *crv1.MySQLCluster) error {
-	statefulSetInterface := c.clientset.AppsV1().StatefulSets(cluster.Namespace)
+	statefulSetInterface := c.kubeClientset.AppsV1().StatefulSets(cluster.Namespace)
 	statefulSet, err := statefulSetForCluster(cluster)
 	if err != nil {
 		return err
@@ -114,7 +138,7 @@ func (c *clusterOperator) createStatefulSet(cluster *crv1.MySQLCluster) error {
 }
 
 func (c *clusterOperator) updateStatefulSet(cluster *crv1.MySQLCluster) error {
-	statefulSetInterface := c.clientset.AppsV1().StatefulSets(cluster.Namespace)
+	statefulSetInterface := c.kubeClientset.AppsV1().StatefulSets(cluster.Namespace)
 	statefulSet, err := statefulSetForCluster(cluster)
 	if err != nil {
 		return err
@@ -138,17 +162,17 @@ func statefulSetForCluster(cluster *crv1.MySQLCluster) (*appsv1.StatefulSet, err
 }
 
 func (c *clusterOperator) removeService(cluster *crv1.MySQLCluster) error {
-	serviceInterface := c.clientset.CoreV1().Services(cluster.Namespace)
+	serviceInterface := c.kubeClientset.CoreV1().Services(cluster.Namespace)
 	return serviceInterface.Delete(cluster.Name, new(metav1.DeleteOptions))
 }
 
 func (c *clusterOperator) removeReadService(cluster *crv1.MySQLCluster) error {
-	serviceInterface := c.clientset.CoreV1().Services(cluster.Namespace)
+	serviceInterface := c.kubeClientset.CoreV1().Services(cluster.Namespace)
 	serviceName := fmt.Sprintf("%s-read", cluster.Name)
 	return serviceInterface.Delete(serviceName, new(metav1.DeleteOptions))
 }
 
 func (c *clusterOperator) removeStatefulSet(cluster *crv1.MySQLCluster) error {
-	statefulSetInterface := c.clientset.AppsV1().StatefulSets(cluster.Namespace)
+	statefulSetInterface := c.kubeClientset.AppsV1().StatefulSets(cluster.Namespace)
 	return statefulSetInterface.Delete(cluster.Name, new(metav1.DeleteOptions))
 }

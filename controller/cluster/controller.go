@@ -19,7 +19,7 @@ func NewClusterController(clientset versioned.Interface, kubeClientset kubernete
 	return &clusterController{
 		Base:            controller.NewControllerBase(),
 		clientset:       clientset,
-		clusterOperator: operator.NewClusterOperator(kubeClientset),
+		clusterOperator: operator.NewClusterOperator(clientset, kubeClientset),
 	}
 }
 
