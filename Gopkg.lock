@@ -387,8 +387,10 @@
     "pkg/apis/apiextensions",
     "pkg/apis/apiextensions/v1beta1",
     "pkg/client/clientset/clientset",
+    "pkg/client/clientset/clientset/fake",
     "pkg/client/clientset/clientset/scheme",
-    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
+    "pkg/client/clientset/clientset/typed/apiextensions/v1beta1/fake"
   ]
   revision = "b89f5ce12ce6e022fc3e9d7586d61346e694d56e"
 
@@ -560,6 +562,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b934ce2990054b492211db099f01521f34e0224a7107205c3ea72ab8f0be6a4d"
+  inputs-digest = "78cf538ffc8ccc486c6e0db36231d0cd83c334f3ae8848c797d97aeac818ecd6"
   solver-name = "gps-cdcl"
   solver-version = 1
