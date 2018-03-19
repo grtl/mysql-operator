@@ -26,11 +26,6 @@ spec:
           containers:
           - name: backup
             image: grtl/xtrabackup:latest
-            env:
-            - name: JOB_NAME
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.name
             command:
             - bash
             - "-c"
@@ -38,11 +33,12 @@ spec:
               set -ex
 
               # Clone data from master.
-              mkdir /mysql/backup/{{ .Name }}/${JOB_NAME}
-              ncat --recv-only {{ .Spec.Cluster }}-$((0)).{{ .Spec.Cluster }} 3307 | xbstream -x -C /mysql/backup/{{ .Name }}/${JOB_NAME}
+              DATE=`date '+%Y-%m-%d-%H-%M'`
+              mkdir /mysql/backup/{{ .Name }}/${DATE}
+              ncat --recv-only {{ .Spec.Cluster }}-0.{{ .Spec.Cluster }} 3307 | xbstream -x -C /mysql/backup/{{ .Name }}/${DATE}
 
               # Prepare the backup.
-              xtrabackup --prepare --target-dir=mysql/backup/{{ .Name }}/${JOB_NAME}
+              xtrabackup --prepare --target-dir=mysql/backup/{{ .Name }}/${DATE}
             volumeMounts:
             - name: backup
               mountPath: /mysql/backup/{{ .Name }}

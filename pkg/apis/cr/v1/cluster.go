@@ -19,9 +19,10 @@ type MySQLCluster struct {
 
 // MySQLClusterSpec stores the properties of a MySQL Cluster.
 type MySQLClusterSpec struct {
-	Password string            `json:"password"`
-	Storage  resource.Quantity `json:"storage"`
-	Replicas int32             `json:"replicas"`
+	Password   string            `json:"password"`
+	Storage    resource.Quantity `json:"storage"`
+	Replicas   int32             `json:"replicas"`
+	FromBackup BackupInstance    `json:"fromBackup,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -32,4 +33,9 @@ type MySQLClusterList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []MySQLCluster `json:"items"`
+}
+
+type BackupInstance struct {
+	BackupName string `json:"backupName"`
+	Instance   string `json:"instance"`
 }
