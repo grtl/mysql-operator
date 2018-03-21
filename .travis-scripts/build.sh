@@ -2,5 +2,5 @@
 
 set -e
 set -v
-GOOS=linux GOARCH=amd64 go build -o mysql-operator
+CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o mysql-operator
 docker build . -t mysql-operator:testing
