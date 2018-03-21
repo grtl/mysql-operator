@@ -2,5 +2,4 @@
 
 set -e
 set -v
-ginkgo -cover ./...
-
+ginkgo -cover -skipPackage e2e ./...
