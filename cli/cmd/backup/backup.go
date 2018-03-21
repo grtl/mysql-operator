@@ -2,6 +2,7 @@ package backup
 
 import "github.com/spf13/cobra"
 
+// Cmd provides commands for managing backup resources.
 var Cmd = &cobra.Command{
 	Use:   "backup",
 	Short: "a short description of backup",
