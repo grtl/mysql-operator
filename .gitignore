@@ -1,5 +1,6 @@
 # Build
 mysql-operator
+cli/cli
 *.coverprofile
 
 # IDE

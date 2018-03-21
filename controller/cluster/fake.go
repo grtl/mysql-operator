@@ -9,6 +9,9 @@ import (
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned/fake"
 )
 
+// FakeClusterController can be used as a cluster controller in tests.
+// It simulates the cluster controller behaviour with fake clientsets
+// and a fake cluster operator.
 type FakeClusterController struct {
 	*clusterController
 	*operator.FakeClusterOperator

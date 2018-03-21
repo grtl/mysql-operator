@@ -26,6 +26,7 @@ type MySQLClusterSpec struct {
 	FromBackup BackupInstance    `json:"fromBackup,omitempty"`
 }
 
+// MySQLClusterStatus represents a cluster's status.
 type MySQLClusterStatus struct {
 	State   string `json:"state,omitempty"`
 	Message string `json:"message,omitempty"`
@@ -41,6 +42,7 @@ type MySQLClusterList struct {
 	Items []MySQLCluster `json:"items"`
 }
 
+// BackupInstance represents a single backup instance.
 type BackupInstance struct {
 	BackupName string `json:"backupName"`
 	Instance   string `json:"instance"`
