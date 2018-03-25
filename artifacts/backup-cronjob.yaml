@@ -1,7 +1,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: {{ .Name }}-job
+  name: {{ CronJobName .Name }}
   ownerReferences:
     - kind: MySQLBackup
       apiVersion: cr.mysqloperator.grtl.github.com/v1
@@ -17,7 +17,7 @@ spec:
           volumes:
           - name: backup
             persistentVolumeClaim:
-              claimName: {{ .Name }}
+              claimName: {{ PVCName .Name }}
           - name: conf
             emptyDir: {}
           - name: config-map

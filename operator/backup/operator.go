@@ -99,13 +99,13 @@ func (b *backupOperator) createCronJob(backup *crv1.MySQLBackup) error {
 
 func pvcForBackup(backup *crv1.MySQLBackup) (*v1.PersistentVolumeClaim, error) {
 	pvc := new(v1.PersistentVolumeClaim)
-	err := util.ObjectFromTemplate(backup, pvc, pvcTemplate)
+	err := util.ObjectFromTemplate(backup, pvc, pvcTemplate, FuncMap)
 	return pvc, err
 }
 
 func cronJobForBackup(backup *crv1.MySQLBackup) (*v1beta1.CronJob, error) {
 	cronJob := new(v1beta1.CronJob)
-	err := util.ObjectFromTemplate(backup, cronJob, cronJobTemplate)
+	err := util.ObjectFromTemplate(backup, cronJob, cronJobTemplate, FuncMap)
 	return cronJob, err
 }
 

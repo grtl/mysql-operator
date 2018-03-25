@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: {{ .Name }}
+  name: {{ StatefulSetName .Name }}
   ownerReferences:
     - kind: MySQLCluster
       apiVersion: cr.mysqloperator.grtl.github.com/v1
