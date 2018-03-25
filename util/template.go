@@ -10,13 +10,13 @@ import (
 
 // ObjectFromTemplate executes Go template with given source object and
 // parses the result into the destination object structure.
-func ObjectFromTemplate(source interface{}, destination interface{}, templateFile string) error {
+func ObjectFromTemplate(source interface{}, destination interface{}, templateFile string, funcMap template.FuncMap) error {
 	assetBytes, err := artifacts.Asset(templateFile)
 	if err != nil {
 		return err
 	}
 
-	tmpl, err := template.New("").Parse(string(assetBytes))
+	tmpl, err := template.New("").Funcs(funcMap).Parse(string(assetBytes))
 	if err != nil {
 		return err
 	}

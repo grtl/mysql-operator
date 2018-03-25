@@ -1,8 +1,6 @@
 package cluster
 
 import (
-	"fmt"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -151,28 +149,27 @@ func (c *clusterOperator) updateStatefulSet(cluster *crv1.MySQLCluster) error {
 
 func serviceForCluster(cluster *crv1.MySQLCluster, filename string) (*corev1.Service, error) {
 	service := new(corev1.Service)
-	err := util.ObjectFromTemplate(cluster, service, filename)
+	err := util.ObjectFromTemplate(cluster, service, filename, FuncMap)
 	return service, err
 }
 
 func statefulSetForCluster(cluster *crv1.MySQLCluster) (*appsv1.StatefulSet, error) {
 	statefulSet := new(appsv1.StatefulSet)
-	err := util.ObjectFromTemplate(cluster, statefulSet, statefulSetTemplate)
+	err := util.ObjectFromTemplate(cluster, statefulSet, statefulSetTemplate, FuncMap)
 	return statefulSet, err
 }
 
 func (c *clusterOperator) removeService(cluster *crv1.MySQLCluster) error {
 	serviceInterface := c.kubeClientset.CoreV1().Services(cluster.Namespace)
-	return serviceInterface.Delete(cluster.Name, new(metav1.DeleteOptions))
+	return serviceInterface.Delete(ServiceName(cluster.Name), new(metav1.DeleteOptions))
 }
 
 func (c *clusterOperator) removeReadService(cluster *crv1.MySQLCluster) error {
 	serviceInterface := c.kubeClientset.CoreV1().Services(cluster.Namespace)
-	serviceName := fmt.Sprintf("%s-read", cluster.Name)
-	return serviceInterface.Delete(serviceName, new(metav1.DeleteOptions))
+	return serviceInterface.Delete(ReadServiceName(cluster.Name), new(metav1.DeleteOptions))
 }
 
 func (c *clusterOperator) removeStatefulSet(cluster *crv1.MySQLCluster) error {
 	statefulSetInterface := c.kubeClientset.AppsV1().StatefulSets(cluster.Namespace)
-	return statefulSetInterface.Delete(cluster.Name, new(metav1.DeleteOptions))
+	return statefulSetInterface.Delete(StatefulSetName(cluster.Name), new(metav1.DeleteOptions))
 }
