@@ -41,6 +41,8 @@ func NewClusterOperator(clientset versioned.Interface, kubeClientset kubernetes.
 }
 
 func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
+	cluster.WithDefaults()
+
 	logging.LogCluster(cluster).Debug("Creating service.")
 	err := c.createService(cluster, serviceTemplate)
 	if err != nil {
@@ -76,6 +78,8 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 }
 
 func (c *clusterOperator) UpdateCluster(newCluster *crv1.MySQLCluster) error {
+	newCluster.WithDefaults()
+
 	logging.LogCluster(newCluster).Debug("Updating stateful set.")
 	err := c.updateStatefulSet(newCluster)
 	if err != nil {
