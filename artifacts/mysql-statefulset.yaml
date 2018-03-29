@@ -192,6 +192,8 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: data
+      labels:
+        app: {{ .Name }}
     spec:
       accessModes: ["ReadWriteOnce"]
       resources:
