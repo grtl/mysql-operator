@@ -5,6 +5,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	defaultReplicas uint32 = 2
+	defaultPort     uint16 = 3306
+	defaultImage           = "mysql:latest"
+)
+
 // +genclient
 // +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
@@ -20,10 +26,18 @@ type MySQLCluster struct {
 
 // MySQLClusterSpec stores the properties of a MySQL Cluster.
 type MySQLClusterSpec struct {
-	Password   string            `json:"password"`
-	Storage    resource.Quantity `json:"storage"`
-	Replicas   int32             `json:"replicas"`
-	FromBackup BackupInstance    `json:"fromBackup,omitempty"`
+	// Secret is the name of Kubernetes secret containing the password.
+	Secret string `json:"secret"`
+	// Storage indicates the size of the Persistance Volume Claim for each replica.
+	Storage resource.Quantity `json:"storage"`
+	// Number of mysql instances in the cluster.
+	Replicas uint32 `json:"replicas,omitempty"`
+	// Port specifies port for MySQL server.
+	Port uint16 `json:"port,omitempty"`
+	// Image allows to specify mysql image
+	Image string `json:"image,omitempty"`
+	// FromBackup lets you specify the backup name to restore the cluster from.
+	FromBackup BackupInstance `json:"fromBackup,omitempty"`
 }
 
 // MySQLClusterStatus represents a cluster's status.
@@ -46,4 +60,19 @@ type MySQLClusterList struct {
 type BackupInstance struct {
 	BackupName string `json:"backupName"`
 	Instance   string `json:"instance"`
+}
+
+// WithDefaults fills cluster missing fields with their default values.
+func (c *MySQLCluster) WithDefaults() {
+	if c.Spec.Replicas == 0 {
+		c.Spec.Replicas = defaultReplicas
+	}
+
+	if c.Spec.Port == 0 {
+		c.Spec.Port = defaultPort
+	}
+
+	if c.Spec.Image == "" {
+		c.Spec.Image = defaultImage
+	}
 }

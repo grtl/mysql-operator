@@ -58,7 +58,7 @@ var _ = Describe("Logging", func() {
 	})
 
 	When("cluster is added", func() {
-		Describe("and succesfully created", func() {
+		Describe("and successfully created", func() {
 			It("event should be logged", func(done Done) {
 				var event controller.Event
 
