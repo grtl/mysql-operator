@@ -4,11 +4,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/spf13/cobra"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
+
 	"github.com/grtl/mysql-operator/cli/cmd/backup"
 	"github.com/grtl/mysql-operator/cli/cmd/cluster"
-
-	"github.com/grtl/mysql-operator/cli/cmd/config"
-	"github.com/spf13/cobra"
+	"github.com/grtl/mysql-operator/cli/config"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -34,7 +36,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	cobra.EnablePrefixMatching = true
 
-	rootCmd.PersistentFlags().StringVar(&kubeconfig, "kubeconfig", "", "kubeconfig file (default is $HOME/.kube/config)")
+	rootCmd.PersistentFlags().StringVarP(&kubeconfig, "kubeconfig", "k", "", "kubeconfig file location (default is $HOME/.kube/config)")
+	rootCmd.PersistentFlags().StringP("namespace", "n", v1.NamespaceDefault, "Select namespace to modify objects in. (default is \"default\")")
+	rootCmd.PersistentFlags().BoolP("force", "f", false, "Ignore errors.")
 
 	rootCmd.AddCommand(cluster.Cmd)
 	rootCmd.AddCommand(backup.Cmd)
