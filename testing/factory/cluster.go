@@ -26,7 +26,7 @@ var MySQLClusterFactory = def.NewFactory(crv1.MySQLCluster{}, "",
 	def.Field("Spec.Storage", resource.MustParse("1Gi")),
 	def.Trait("ChangeDefaults",
 		def.DynamicField("Spec.Replicas", func(model interface{}) (interface{}, error) {
-			return uint32(randomdata.Number(3, 1<<8)), nil
+			return int32(randomdata.Number(3, 1<<8)), nil
 		}),
 		def.DynamicField("Spec.Port", func(model interface{}) (interface{}, error) {
 			return int32(randomdata.Number(1<<12, 1<<16)), nil
