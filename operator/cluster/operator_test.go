@@ -98,9 +98,23 @@ var _ = Describe("Cluster Operator", func() {
 		})
 
 		It("creates the appropriate StatefulSet", func() {
+			name := cluster.Name
 			sets, err := statefulSets.List(metav1.ListOptions{})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(sets.Items).To(HaveLen(1))
+
+			sts := sets.Items[0]
+
+			Expect(sts.Name).To(Equal(StatefulSetName(name)))
+			Expect(sts.OwnerReferences[0].UID).To(Equal(cluster.UID))
+			Expect(sts.Spec.Selector.MatchLabels).To(Equal(map[string]string{
+				"app": name,
+			}))
+			Expect(*sts.Spec.Replicas).To(Equal(cluster.Spec.Replicas))
+			Expect(sts.Spec.VolumeClaimTemplates[0].Spec.Resources.Requests).To(
+				Equal(apicorev1.ResourceList{
+					"storage": cluster.Spec.Storage,
+				}))
 		})
 	})
 })
