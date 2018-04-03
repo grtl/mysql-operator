@@ -29,7 +29,7 @@ var MySQLClusterFactory = def.NewFactory(crv1.MySQLCluster{}, "",
 			return uint32(randomdata.Number(3, 1<<8)), nil
 		}),
 		def.DynamicField("Spec.Port", func(model interface{}) (interface{}, error) {
-			return uint16(randomdata.Number(1<<12, 1<<16)), nil
+			return int32(randomdata.Number(1<<12, 1<<16)), nil
 		}),
 		def.DynamicField("Spec.Image", func(model interface{}) (interface{}, error) {
 			major := randomdata.Number(1, 10)

@@ -7,7 +7,7 @@ import (
 
 const (
 	defaultReplicas uint32 = 2
-	defaultPort     uint16 = 3306
+	defaultPort     int32  = 3306
 	defaultImage           = "mysql:latest"
 )
 
@@ -33,7 +33,7 @@ type MySQLClusterSpec struct {
 	// Number of mysql instances in the cluster.
 	Replicas uint32 `json:"replicas,omitempty"`
 	// Port specifies port for MySQL server.
-	Port uint16 `json:"port,omitempty"`
+	Port int32 `json:"port,omitempty"`
 	// Image allows to specify mysql image
 	Image string `json:"image,omitempty"`
 	// FromBackup lets you specify the backup name to restore the cluster from.
