@@ -7,6 +7,7 @@ import (
 
 	"io/ioutil"
 
+	apicorev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/fake"
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
@@ -56,6 +57,44 @@ var _ = Describe("Cluster Operator", func() {
 			svcs, err := services.List(metav1.ListOptions{})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(svcs.Items).To(HaveLen(2))
+		})
+
+		It("creates the appropriate read-write service", func() {
+			name := cluster.Name
+			svcs, err := services.List(metav1.ListOptions{})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			var readSvc *apicorev1.Service = nil
+			for _, svc := range svcs.Items {
+				if svc.Name == ServiceName(name) {
+					readSvc = &svc
+				}
+			}
+
+			Expect(readSvc).NotTo(BeNil())
+			Expect(readSvc.OwnerReferences[0].UID).To(Equal(cluster.UID))
+			Expect(readSvc.Spec.Ports[0].Port).To(Equal(cluster.Spec.Port))
+			Expect(readSvc.Spec.Selector["app"]).To(Equal(name))
+		})
+
+		It("creates the appropriate read service", func() {
+			name := cluster.Name
+			svcs, err := services.List(metav1.ListOptions{})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			var readSvc *apicorev1.Service = nil
+			for _, svc := range svcs.Items {
+				if svc.Name == ReadServiceName(name) {
+					readSvc = &svc
+				}
+			}
+
+			Expect(readSvc).NotTo(BeNil())
+			Expect(readSvc.OwnerReferences[0].UID).To(Equal(cluster.UID))
+			Expect(readSvc.Spec.Ports[0].Port).To(Equal(cluster.Spec.Port))
+			Expect(readSvc.Spec.Selector["app"]).To(Equal(name))
 		})
 
 		It("creates the appropriate StatefulSet", func() {
