@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	defaultReplicas uint32 = 2
-	defaultPort     int32  = 3306
-	defaultImage           = "mysql:latest"
+	defaultReplicas int32 = 2
+	defaultPort     int32 = 3306
+	defaultImage          = "mysql:latest"
 )
 
 // +genclient
@@ -31,7 +31,7 @@ type MySQLClusterSpec struct {
 	// Storage indicates the size of the Persistance Volume Claim for each replica.
 	Storage resource.Quantity `json:"storage"`
 	// Number of mysql instances in the cluster.
-	Replicas uint32 `json:"replicas,omitempty"`
+	Replicas int32 `json:"replicas,omitempty"`
 	// Port specifies port for MySQL server.
 	Port int32 `json:"port,omitempty"`
 	// Image allows to specify mysql image
