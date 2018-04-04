@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	defaultReplicas int32 = 2
-	defaultPort     int32 = 3306
-	defaultImage          = "mysql:latest"
+	DefaultReplicas int32 = 2
+	DefaultPort     int32 = 3306
+	DefaultImage          = "mysql:latest"
 )
 
 // +genclient
@@ -65,14 +65,14 @@ type BackupInstance struct {
 // WithDefaults fills cluster missing fields with their default values.
 func (c *MySQLCluster) WithDefaults() {
 	if c.Spec.Replicas == 0 {
-		c.Spec.Replicas = defaultReplicas
+		c.Spec.Replicas = DefaultReplicas
 	}
 
 	if c.Spec.Port == 0 {
-		c.Spec.Port = defaultPort
+		c.Spec.Port = DefaultPort
 	}
 
 	if c.Spec.Image == "" {
-		c.Spec.Image = defaultImage
+		c.Spec.Image = DefaultImage
 	}
 }

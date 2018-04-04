@@ -19,3 +19,8 @@ func FailOnErrorOrForceContinue(err error, opts *options.Options) {
 		os.Exit(1)
 	}
 }
+
+func FailWithError(err error) {
+	fmt.Fprintln(os.Stderr, err.Error())
+	os.Exit(1)
+}
