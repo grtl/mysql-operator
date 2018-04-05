@@ -40,9 +40,13 @@ func NewBackupOperator(verClientset versioned.Interface, clientset kubernetes.In
 
 func (b *backupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
 	clusterName := backup.Spec.Cluster
-	_, err := b.verClientset.CrV1().MySQLClusters(metav1.NamespaceDefault).Get(clusterName, metav1.GetOptions{})
+	cluster, err := b.verClientset.CrV1().MySQLClusters(metav1.NamespaceDefault).Get(clusterName, metav1.GetOptions{})
 	if err != nil {
 		return err
+	}
+
+	if backup.Spec.Storage.IsZero() {
+		backup.Spec.Storage = cluster.Spec.Storage
 	}
 
 	logging.LogBackup(backup).Debug("Creating PVC.")
