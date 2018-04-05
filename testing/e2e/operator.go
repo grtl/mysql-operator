@@ -19,8 +19,9 @@ import (
 )
 
 const (
-	operatorPod   = "mysql-operator"
-	operatorImage = "--image=mysql-operator:testing"
+	operatorPod          = "mysql-operator"
+	operatorImage        = "--image=mysql-operator:testing"
+	operatorStartupDelay = 5 * time.Second
 )
 
 // Operator represents MySQL operator pod deployed in the cluster
@@ -75,7 +76,13 @@ func (o *operator) Start() error {
 	if err != nil {
 		return err
 	}
-	return o.waitForPodStarted()
+	err = o.waitForPodStarted()
+	if err != nil {
+		return err
+	}
+
+	time.Sleep(operatorStartupDelay)
+	return nil
 }
 
 func (o *operator) Stop() error {
