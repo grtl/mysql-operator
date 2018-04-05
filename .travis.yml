@@ -19,6 +19,7 @@ script:
   - hack/verify-codegen.sh
   - hack/verify-artifacts.sh
   - .travis-scripts/build.sh
+  - .travis-scripts/build-cli.sh
   - .travis-scripts/test.sh
   - hack/e2e.sh
 
