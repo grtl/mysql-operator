@@ -26,21 +26,21 @@ type Operator interface {
 }
 
 type backupOperator struct {
-	clientset    kubernetes.Interface
-	verClientset versioned.Interface
+	clientset     versioned.Interface
+	kubeClientset kubernetes.Interface
 }
 
 // NewBackupOperator returns a new Operator.
-func NewBackupOperator(verClientset versioned.Interface, clientset kubernetes.Interface) Operator {
+func NewBackupOperator(clientset versioned.Interface, kubeClientset kubernetes.Interface) Operator {
 	return &backupOperator{
-		clientset:    clientset,
-		verClientset: verClientset,
+		clientset:     clientset,
+		kubeClientset: kubeClientset,
 	}
 }
 
 func (b *backupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
 	clusterName := backup.Spec.Cluster
-	cluster, err := b.verClientset.CrV1().MySQLClusters(metav1.NamespaceDefault).Get(clusterName, metav1.GetOptions{})
+	cluster, err := b.clientset.CrV1().MySQLClusters(metav1.NamespaceDefault).Get(clusterName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func (b *backupOperator) ScheduleBackup(backup *crv1.MySQLBackup) error {
 }
 
 func (b *backupOperator) createPVC(backup *crv1.MySQLBackup) error {
-	pvcInterface := b.clientset.CoreV1().PersistentVolumeClaims(backup.Namespace)
+	pvcInterface := b.kubeClientset.CoreV1().PersistentVolumeClaims(backup.Namespace)
 	pvc, err := pvcForBackup(backup)
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func (b *backupOperator) createPVC(backup *crv1.MySQLBackup) error {
 }
 
 func (b *backupOperator) createCronJob(backup *crv1.MySQLBackup) error {
-	cronJobInterface := b.clientset.BatchV1beta1().CronJobs(backup.Namespace)
+	cronJobInterface := b.kubeClientset.BatchV1beta1().CronJobs(backup.Namespace)
 	cronJob, err := cronJobForBackup(backup)
 	if err != nil {
 		return err
@@ -114,6 +114,6 @@ func cronJobForBackup(backup *crv1.MySQLBackup) (*v1beta1.CronJob, error) {
 }
 
 func (b *backupOperator) removePVC(backup *crv1.MySQLBackup) error {
-	pvcInterface := b.clientset.CoreV1().Services(backup.Namespace)
+	pvcInterface := b.kubeClientset.CoreV1().Services(backup.Namespace)
 	return pvcInterface.Delete(backup.Name, new(metav1.DeleteOptions))
 }
