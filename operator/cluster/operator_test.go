@@ -43,8 +43,8 @@ var _ = Describe("Cluster Operator", func() {
 
 		operator = NewClusterOperator(clientset, kubeClientset)
 
-		services = kubeClientset.CoreV1().Services("default")
-		statefulSets = kubeClientset.AppsV1().StatefulSets("default")
+		services = kubeClientset.CoreV1().Services(metav1.NamespaceDefault)
+		statefulSets = kubeClientset.AppsV1().StatefulSets(metav1.NamespaceDefault)
 	})
 
 	JustBeforeEach(func() {
