@@ -1,4 +1,4 @@
-package crd_test
+package backup_test
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestCrd(t *testing.T) {
+func TestBackup(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CRD Suite")
+	RunSpecs(t, "CRD Backup Suite")
 }
