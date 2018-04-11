@@ -1,4 +1,4 @@
-package crd_test
+package crd
 
 import (
 	. "github.com/onsi/ginkgo"
@@ -6,6 +6,6 @@ import (
 	//. "github.com/grtl/mysql-operator/crd"
 )
 
-var _ = Describe("Util", func() {
+var _ = Describe("Wait", func() {
 
 })
