@@ -12,7 +12,7 @@ install:
   - .travis-scripts/install-minikube.sh
 
 before_script:
-  - sudo minikube start --vm-driver=none --kubernetes-version=$K8S_VERSION
+  - sudo minikube start --vm-driver=none --bootstrapper=localkube --kubernetes-version=$K8S_VERSION
 
 script:
   - .travis-scripts/format.sh
