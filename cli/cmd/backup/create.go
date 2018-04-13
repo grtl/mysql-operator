@@ -2,7 +2,6 @@ package backup
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -10,6 +9,7 @@ import (
 
 	"github.com/grtl/mysql-operator/cli/config"
 	"github.com/grtl/mysql-operator/cli/options"
+	"github.com/grtl/mysql-operator/cli/util"
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 )
 
@@ -21,11 +21,11 @@ var (
 )
 
 var backupCreateCmd = &cobra.Command{
-	Use:   "create [backup name]",
+	Use:   "create",
 	Short: "Schedules a new MySQL backup",
 	Long: `Schedules a new MySQL backup for specified cluster. The backups will
 be created according to cron-style time provided.
-msp backup create "my-backup" --cluster "my-cluster"`,
+msp backup create --name "my-backup" --cluster "my-cluster"`,
 	Args: cobra.MaximumNArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		options := options.ExtractOptions(cmd)
@@ -36,8 +36,7 @@ msp backup create "my-backup" --cluster "my-cluster"`,
 
 		err := createMySQLBackup(options)
 		if err != nil {
-			fmt.Fprintln(os.Stderr, err.Error())
-			os.Exit(1)
+			util.FailWithError(err)
 		}
 	},
 }
@@ -51,7 +50,7 @@ func init() {
 	backupCreateCmd.Flags().StringVarP(&time, "time", "t", "", "cron-style time")
 	backupCreateCmd.MarkFlagRequired("time")
 	backupCreateCmd.Flags().StringVarP(&storage, "storage", "s", "1Gi", "storage value")
-	backupCreateCmd.Flags().StringVar(&storage, "name", "", "backup name")
+	backupCreateCmd.Flags().StringVar(&backupName, "name", "", "backup name")
 }
 
 func createMySQLBackup(options *options.Options) error {
