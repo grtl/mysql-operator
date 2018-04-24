@@ -20,6 +20,7 @@ func FailOnErrorOrForceContinue(err error, opts *options.Options) {
 	}
 }
 
+// Fail with error prints out an error to stderr and exits with EXIT_FAILURE.
 func FailWithError(err error) {
 	fmt.Fprintln(os.Stderr, err.Error())
 	os.Exit(1)

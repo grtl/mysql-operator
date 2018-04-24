@@ -5,6 +5,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+// Default values for optional fields.
 const (
 	DefaultReplicas int32 = 2
 	DefaultPort     int32 = 3306
@@ -28,7 +29,7 @@ type MySQLCluster struct {
 type MySQLClusterSpec struct {
 	// Secret is the name of Kubernetes secret containing the password.
 	Secret string `json:"secret"`
-	// Storage indicates the size of the Persistance Volume Claim for each replica.
+	// Storage indicates the size of the Persistent Volume Claim for each replica.
 	Storage resource.Quantity `json:"storage"`
 	// Number of mysql instances in the cluster.
 	Replicas int32 `json:"replicas,omitempty"`

@@ -5,15 +5,17 @@ BUILD="false"
 UP="false"
 DOWN="false"
 DRIVER=""
+VERSION=""
 
 # Prints usage
 function usage() {
-	echo "Usage: $0 [-b] [-u [-v driver]] [-d] [-h]" 1>&2
+	echo "Usage: $0 [-b] [-u [-v version][-m driver]] [-d] [-h]" 1>&2
 	echo "	-b	Build operator image" 1>&2
 	echo "	-u	Start the minikube cluster" 1>&2
 	echo "	-d	Stop the minikube cluster after tests" 1>&2
-	echo "	-v	Change the vm-driver used by minikube" 1>&2
-	echo "	-h	Print this help"
+	echo "	-m	Change the vm-driver used by minikube" 1>&2
+    echo "  -v  Change kubernetes version" 1>&2
+	echo "	-h	Print this help" 1>&2
 }
 
 function end() {
@@ -24,12 +26,13 @@ function end() {
 }
 
 # Parse arguments
-while getopts "budv:h" arg; do
+while getopts "budv:m:h" arg; do
 	case $arg in
 		b) BUILD="true" ;;
 		u) UP="true" ;;
 		d) DOWN="true" ;;
-		v) DRIVER="$OPTARG" ;;
+		m) DRIVER="$OPTARG" ;;
+		v) VERSION="$OPTARG" ;;
 		h | *) usage && exit 0;;
 	esac
 done
@@ -45,7 +48,8 @@ fi
 
 if [ $UP == "true" ]; then
   [[ -z "$DRIVER" ]] || DRIVER="--vm-driver=$DRIVER"
-	minikube start --kubernetes-version=v1.9.0 $DRIVER || exit 2
+  [[ -z "$VERSION" ]] || VERSION="--kubernetes-version=$VERSION"
+  minikube start $VERSION $DRIVER || exit 2
 fi
 
 # Evaluate docker env for minikube in order to run local image
