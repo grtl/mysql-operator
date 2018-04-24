@@ -6,7 +6,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
 
-	"github.com/grtl/mysql-operator/testing/e2e"
+	"github.com/grtl/mysql-operator/pkg/testing/e2e"
 )
 
 var operator e2e.Operator

@@ -14,12 +14,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/grtl/mysql-operator/controller/backup"
-	"github.com/grtl/mysql-operator/controller/cluster"
-	backupcrd "github.com/grtl/mysql-operator/crd/backup"
-	clustercrd "github.com/grtl/mysql-operator/crd/cluster"
-	operator "github.com/grtl/mysql-operator/operator/cluster"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
+	"github.com/grtl/mysql-operator/pkg/controller/backup"
+	"github.com/grtl/mysql-operator/pkg/controller/cluster"
+	backupcrd "github.com/grtl/mysql-operator/pkg/crd/backup"
+	clustercrd "github.com/grtl/mysql-operator/pkg/crd/cluster"
+	operator "github.com/grtl/mysql-operator/pkg/operator/cluster"
 )
 
 var (
