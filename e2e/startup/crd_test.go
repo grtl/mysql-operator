@@ -5,21 +5,22 @@ import (
 	. "github.com/onsi/gomega"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"github.com/grtl/mysql-operator/pkg/crd/backup"
+	"github.com/grtl/mysql-operator/pkg/crd/cluster"
 )
 
 var _ = Describe("On operator startup", func() {
 	It("should register MySQLCluster crd", func() {
-		const clusterCRD = "mysqlclusters.cr.mysqloperator.grtl.github.com"
-		crd, err := operator.ExtClientset().ApiextensionsV1beta1().
-			CustomResourceDefinitions().Get(clusterCRD, metav1.GetOptions{})
+		crdInterface := operator.ExtClientset().ApiextensionsV1beta1().CustomResourceDefinitions()
+		crd, err := crdInterface.Get(cluster.CustomResourceName, metav1.GetOptions{})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(crd.Spec.Names.Kind).To(Equal("MySQLCluster"))
 	})
 
 	It("should register MySQLBackup crd", func() {
-		const backupCRD = "mysqlbackups.cr.mysqloperator.grtl.github.com"
-		crd, err := operator.ExtClientset().ApiextensionsV1beta1().
-			CustomResourceDefinitions().Get(backupCRD, metav1.GetOptions{})
+		crdInterface := operator.ExtClientset().ApiextensionsV1beta1().CustomResourceDefinitions()
+		crd, err := crdInterface.Get(backup.CustomResourceName, metav1.GetOptions{})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(crd.Spec.Names.Kind).To(Equal("MySQLBackup"))
 	})
