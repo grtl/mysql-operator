@@ -51,8 +51,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=cr.mysqloperator.grtl.github.com, Version=v1
-	case v1.SchemeGroupVersion.WithResource("mysqlbackups"):
-		return &genericInformer{resource: resource.GroupResource(), informer: f.Cr().V1().MySQLBackups().Informer()}, nil
+	case v1.SchemeGroupVersion.WithResource("mysqlbackupschedules"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Cr().V1().MySQLBackupSchedules().Informer()}, nil
 	case v1.SchemeGroupVersion.WithResource("mysqlclusters"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Cr().V1().MySQLClusters().Informer()}, nil
 

@@ -6,7 +6,7 @@ import (
 )
 
 // FuncMap can be used to execute templates with the helper functions from
-// the cluster operator util.
+// the cluster operator fail.
 var FuncMap = template.FuncMap{
 	"StatefulSetName": StatefulSetName,
 	"ServiceName":     ServiceName,

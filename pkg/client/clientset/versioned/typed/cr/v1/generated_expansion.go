@@ -16,6 +16,6 @@ limitations under the License.
 
 package v1
 
-type MySQLBackupExpansion interface{}
+type MySQLBackupScheduleExpansion interface{}
 
 type MySQLClusterExpansion interface{}

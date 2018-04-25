@@ -26,16 +26,16 @@ var _ = Describe("Fake cluster operator", func() {
 	})
 
 	Describe("AddCluster", func() {
-		When("No error is set", func() {
-			It("should return without error", func() {
+		When("No fail is set", func() {
+			It("should return without fail", func() {
 				err := operator.AddCluster(cluster)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		When("An error is set", func() {
-			It("should return the error", func() {
-				expectedErr := fmt.Errorf("Expected error")
+		When("An fail is set", func() {
+			It("should return the fail", func() {
+				expectedErr := fmt.Errorf("Expected fail")
 				operator.SetError(expectedErr)
 				err := operator.AddCluster(cluster)
 				Expect(err).To(HaveOccurred())
@@ -45,16 +45,16 @@ var _ = Describe("Fake cluster operator", func() {
 	})
 
 	Describe("UpdateCluster", func() {
-		When("No error is set", func() {
-			It("should return without error", func() {
+		When("No fail is set", func() {
+			It("should return without fail", func() {
 				err := operator.UpdateCluster(cluster)
 				Expect(err).NotTo(HaveOccurred())
 			})
 		})
 
-		When("An error is set", func() {
-			It("should return the error", func() {
-				expectedErr := fmt.Errorf("Expected error")
+		When("An fail is set", func() {
+			It("should return the fail", func() {
+				expectedErr := fmt.Errorf("Expected fail")
 				operator.SetError(expectedErr)
 				err := operator.UpdateCluster(cluster)
 				Expect(err).To(HaveOccurred())

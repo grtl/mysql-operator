@@ -9,8 +9,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/errors"
 
 	"github.com/grtl/mysql-operator/pkg/cmd/util/config"
+	"github.com/grtl/mysql-operator/pkg/cmd/util/fail"
 	"github.com/grtl/mysql-operator/pkg/cmd/util/options"
-	"github.com/grtl/mysql-operator/pkg/cmd/util/util"
 )
 
 var removePVC bool
@@ -26,7 +26,7 @@ Unless explicitly specified, does not remove PersistentVolumeClaims.`,
 
 		for _, arg := range args {
 			err := deleteCluster(arg, options)
-			util.FailOnErrorOrForceContinue(err, options)
+			fail.ErrorOrForceContinue(err, options)
 		}
 	},
 }

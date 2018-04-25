@@ -8,7 +8,7 @@ import (
 )
 
 var backupUpdateCmd = &cobra.Command{
-	Use:   "update [backup name]",
+	Use:   "update [backupschedule name]",
 	Short: "A short description of backup update",
 	Long: `A longer description of backup update with usage:
 msp backup update "my-backup"`,

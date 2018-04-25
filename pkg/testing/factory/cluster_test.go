@@ -10,7 +10,7 @@ import (
 	"github.com/nauyey/factory"
 )
 
-var _ = Describe("Cluster", func() {
+var _ = Describe("Factory Cluster", func() {
 	When("ChangeDefaults Trait is not specified", func() {
 		It("should generate a cluster", func() {
 			cluster := new(crv1.MySQLCluster)

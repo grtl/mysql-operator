@@ -5,7 +5,7 @@ import (
 )
 
 // FakeClusterOperator may be used in tests as a cluster operator.
-// It implements all operator functions as simply returning an error
+// It implements all operator functions as simply returning an fail
 // set via SetError.
 type FakeClusterOperator struct {
 	err error
@@ -21,13 +21,13 @@ func (c *FakeClusterOperator) SetError(err error) {
 	c.err = err
 }
 
-// AddCluster simulates adding a cluster. Returns error set via SetError.
+// AddCluster simulates adding a cluster. Returns fail set via SetError.
 func (c *FakeClusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 	// Just pretend we're adding a cluster. Return err.
 	return c.err
 }
 
-// UpdateCluster simulates updating a cluster. Returns error set via SetError.
+// UpdateCluster simulates updating a cluster. Returns fail set via SetError.
 func (c *FakeClusterOperator) UpdateCluster(newCluster *crv1.MySQLCluster) error {
 	// Just pretend we're updating a cluster. Do nothing.
 	return c.err

@@ -9,8 +9,8 @@ import (
 
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/cmd/util/config"
+	"github.com/grtl/mysql-operator/pkg/cmd/util/fail"
 	"github.com/grtl/mysql-operator/pkg/cmd/util/options"
-	"github.com/grtl/mysql-operator/pkg/cmd/util/util"
 )
 
 var (
@@ -22,8 +22,8 @@ var (
 
 var backupCreateCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Schedules a new MySQL backup",
-	Long: `Schedules a new MySQL backup for specified cluster. The backups will
+	Short: "Creates a new MySQL Backup Schedule",
+	Long: `Creates a new MySQL Backup Schedule for specified cluster. The backups will
 be created according to cron-style time provided.
 msp backup create --name "my-backup" --cluster "my-cluster"`,
 	Args: cobra.MaximumNArgs(0),
@@ -36,7 +36,7 @@ msp backup create --name "my-backup" --cluster "my-cluster"`,
 
 		err := createMySQLBackup(options)
 		if err != nil {
-			util.FailWithError(err)
+			fail.Error(err)
 		}
 	},
 }
@@ -50,7 +50,7 @@ func init() {
 	backupCreateCmd.Flags().StringVarP(&time, "time", "t", "", "cron-style time")
 	backupCreateCmd.MarkFlagRequired("time")
 	backupCreateCmd.Flags().StringVarP(&storage, "storage", "s", "1Gi", "storage value")
-	backupCreateCmd.Flags().StringVar(&backupName, "name", "", "backup name")
+	backupCreateCmd.Flags().StringVar(&backupName, "name", "", "backupschedule name")
 }
 
 func createMySQLBackup(options *options.Options) error {
@@ -68,12 +68,12 @@ func createMySQLBackup(options *options.Options) error {
 		}
 	}
 
-	mySQLBackupInterface := config.GetConfig().Clientset().CrV1().MySQLBackups(options.Namespace)
-	_, err = mySQLBackupInterface.Create(&crv1.MySQLBackup{
+	mySQLBackupInterface := config.GetConfig().Clientset().CrV1().MySQLBackupSchedules(options.Namespace)
+	_, err = mySQLBackupInterface.Create(&crv1.MySQLBackupSchedule{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: backupName,
 		},
-		Spec: crv1.MySQLBackupSpec{
+		Spec: crv1.MySQLBackupScheduleSpec{
 			Cluster: clusterName,
 			Time:    time,
 			Storage: storageQuantity,

@@ -15,9 +15,9 @@ import (
 )
 
 const (
-	serviceTemplate     = "artifacts/mysql-service.yaml"
-	serviceReadTemplate = "artifacts/mysql-service-read.yaml"
-	statefulSetTemplate = "artifacts/mysql-statefulset.yaml"
+	serviceTemplate     = "artifacts/cluster-service.yaml"
+	serviceReadTemplate = "artifacts/cluster-service-read.yaml"
+	statefulSetTemplate = "artifacts/cluster-statefulset.yaml"
 )
 
 // Operator represents an object to manipulate MySQLCluster custom resources.
@@ -54,7 +54,7 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 	if err != nil {
 		// Cleanup - remove already created service
 		logging.LogCluster(cluster).WithField(
-			"error", err).Warn("Reverting service creation.")
+			"fail", err).Warn("Reverting service creation.")
 		removeErr := c.removeService(cluster)
 		return errors.NewAggregate([]error{err, removeErr})
 	}
@@ -64,12 +64,12 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 	if err != nil {
 		// Cleanup - remove already created services
 		logging.LogCluster(cluster).WithField(
-			"error", err).Warn("Reverting service creation.")
+			"fail", err).Warn("Reverting service creation.")
 		removeErr := c.removeService(cluster)
 		err = errors.NewAggregate([]error{err, removeErr})
 
 		logging.LogCluster(cluster).WithField(
-			"error", err).Warn("Reverting read service creation.")
+			"fail", err).Warn("Reverting read service creation.")
 		removeErr = c.removeReadService(cluster)
 		return errors.NewAggregate([]error{err, removeErr})
 	}
@@ -84,7 +84,7 @@ func (c *clusterOperator) UpdateCluster(newCluster *crv1.MySQLCluster) error {
 	err := c.updateStatefulSet(newCluster)
 	if err != nil {
 		logging.LogCluster(newCluster).WithField(
-			"error", err).Warn("Setting status")
+			"fail", err).Warn("Setting status")
 		setStateErr := c.setClusterState(
 			newCluster,
 			"Failed update",

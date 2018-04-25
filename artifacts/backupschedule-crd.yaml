@@ -1,0 +1,15 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: mysqlbackupschedules.cr.mysqloperator.grtl.github.com
+spec:
+  group: cr.mysqloperator.grtl.github.com
+  names:
+    kind: MySQLBackupSchedule
+    listKind: MySQLBackupScheduleList
+    singular: mysqlbackupschedule
+    plural: mysqlbackupschedules
+    shortNames:
+    - mbs
+  scope: Namespaced
+  version: v1

@@ -57,7 +57,7 @@ type MySQLClusterList struct {
 	Items []MySQLCluster `json:"items"`
 }
 
-// BackupInstance represents a single backup instance.
+// BackupInstance represents a single backupschedule instance.
 type BackupInstance struct {
 	BackupName string `json:"backupName"`
 	Instance   string `json:"instance"`

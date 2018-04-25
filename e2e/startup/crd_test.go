@@ -6,7 +6,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/grtl/mysql-operator/pkg/crd/backup"
+	"github.com/grtl/mysql-operator/pkg/crd/backupschedule"
 	"github.com/grtl/mysql-operator/pkg/crd/cluster"
 )
 
@@ -18,10 +18,10 @@ var _ = Describe("On operator startup", func() {
 		Expect(crd.Spec.Names.Kind).To(Equal("MySQLCluster"))
 	})
 
-	It("should register MySQLBackup crd", func() {
+	It("should register MySQLBackupSchedule crd", func() {
 		crdInterface := operator.ExtClientset().ApiextensionsV1beta1().CustomResourceDefinitions()
-		crd, err := crdInterface.Get(backup.CustomResourceName, metav1.GetOptions{})
+		crd, err := crdInterface.Get(backupschedule.CustomResourceName, metav1.GetOptions{})
 		Expect(err).NotTo(HaveOccurred())
-		Expect(crd.Spec.Names.Kind).To(Equal("MySQLBackup"))
+		Expect(crd.Spec.Names.Kind).To(Equal("MySQLBackupSchedule"))
 	})
 })
