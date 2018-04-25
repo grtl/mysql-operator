@@ -16,6 +16,14 @@ limitations under the License.
 
 package v1
 
+// MySQLBackupInstanceListerExpansion allows custom methods to be added to
+// MySQLBackupInstanceLister.
+type MySQLBackupInstanceListerExpansion interface{}
+
+// MySQLBackupInstanceNamespaceListerExpansion allows custom methods to be added to
+// MySQLBackupInstanceNamespaceLister.
+type MySQLBackupInstanceNamespaceListerExpansion interface{}
+
 // MySQLBackupScheduleListerExpansion allows custom methods to be added to
 // MySQLBackupScheduleLister.
 type MySQLBackupScheduleListerExpansion interface{}

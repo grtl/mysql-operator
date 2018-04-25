@@ -26,6 +26,10 @@ type FakeCrV1 struct {
 	*testing.Fake
 }
 
+func (c *FakeCrV1) MySQLBackupInstances(namespace string) v1.MySQLBackupInstanceInterface {
+	return &FakeMySQLBackupInstances{c, namespace}
+}
+
 func (c *FakeCrV1) MySQLBackupSchedules(namespace string) v1.MySQLBackupScheduleInterface {
 	return &FakeMySQLBackupSchedules{c, namespace}
 }

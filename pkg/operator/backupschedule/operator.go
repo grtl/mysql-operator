@@ -17,7 +17,7 @@ import (
 
 const (
 	cronJobTemplate = "artifacts/backupschedule-cronjob.yaml"
-	pvcTemplate     = "artifacts/backup-pvc.yaml"
+	pvcTemplate     = "artifacts/backupschedule-pvc.yaml"
 )
 
 // Operator represents an object to manipulate Backup custom resources.

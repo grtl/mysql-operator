@@ -10,6 +10,7 @@ spec:
     singular: mysqlbackupschedule
     plural: mysqlbackupschedules
     shortNames:
+    - mb
     - mbs
   scope: Namespaced
   version: v1

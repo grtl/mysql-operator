@@ -9,5 +9,5 @@ import (
 
 func TestBackup(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "CRD Backup Suite")
+	RunSpecs(t, "CRD Backup Schedule Suite")
 }
