@@ -17,7 +17,7 @@ function fmt_error() {
 
 function vet_error() {
 	echo >&2 "Go files must pass the go vet checks. Please run:"
-	echo >&2 "  go vet $(go list ./... | grep -v '/pkg/client/')"
+	echo >&2 "  go vet \$(go list ./... | grep -v '/pkg/client/')"
 	echo >&2 "and fix the errors"
 	exit 2
 }
@@ -43,7 +43,7 @@ else
 	[ -z "$unformatted" ] || fmt_error
 
 	echo >&2 " - Checking go vet"
-	unvet=$(go vet $(go list ./... | grep -v '/pkg/client/'))
+	unvet=$(go vet 2>&1 $(go list ./... | grep -v '/pkg/client/'))
 	[ -z "$unvet" ] || vet_error
 
 	echo >&2 " - Checking codegen"
