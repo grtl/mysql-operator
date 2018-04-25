@@ -17,7 +17,8 @@ import (
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/pkg/controller/backupschedule"
 	"github.com/grtl/mysql-operator/pkg/controller/cluster"
-	backupcrd "github.com/grtl/mysql-operator/pkg/crd/backupschedule"
+	backupinstancecrd "github.com/grtl/mysql-operator/pkg/crd/backupinstance"
+	backupschedulecrd "github.com/grtl/mysql-operator/pkg/crd/backupschedule"
 	clustercrd "github.com/grtl/mysql-operator/pkg/crd/cluster"
 	operator "github.com/grtl/mysql-operator/pkg/operator/cluster"
 )
@@ -105,7 +106,12 @@ func initializeObjects() error {
 		return err
 	}
 
-	err = backupcrd.CreateBackupScheduleCRD(extClientset)
+	err = backupschedulecrd.CreateBackupScheduleCRD(extClientset)
+	if err != nil {
+		return err
+	}
+
+	err = backupinstancecrd.CreateBackupInstanceCRD(extClientset)
 	if err != nil {
 		return err
 	}
