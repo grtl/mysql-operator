@@ -41,11 +41,6 @@ done
 cd "$(dirname "$0")"
 cd ..
 
-# Rebuild docker image
-if [ $BUILD == "true" ]; then
-	./.travis-scripts/build.sh || exit 1
-fi
-
 if [ $UP == "true" ]; then
   [[ -z "$DRIVER" ]] || DRIVER="--vm-driver=$DRIVER"
   [[ -z "$VERSION" ]] || VERSION="--kubernetes-version=$VERSION"
@@ -55,6 +50,11 @@ fi
 # Evaluate docker env for minikube in order to run local image
 if [ "$(minikube docker-env)" != "'none' driver does not support 'minikube docker-env' command" ]; then
 	eval $(minikube docker-env) || end 3
+fi
+
+# Rebuild docker image
+if [ $BUILD == "true" ]; then
+	./.travis-scripts/build.sh || exit 1
 fi
 
 ginkgo e2e/... || end 4

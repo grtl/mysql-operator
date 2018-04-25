@@ -73,7 +73,7 @@ var _ = Describe("Cluster", func() {
 	})
 
 	Context("Error", func() {
-		It("should log with error level", func() {
+		It("should log with fail level", func() {
 			LogCluster(cluster).Error("Error")
 			Expect(logrusHook.Entries).To(HaveLen(1))
 			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.ErrorLevel))

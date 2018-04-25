@@ -22,8 +22,8 @@ import (
 
 // Interface provides access to all the informers in this group version.
 type Interface interface {
-	// MySQLBackups returns a MySQLBackupInformer.
-	MySQLBackups() MySQLBackupInformer
+	// MySQLBackupSchedules returns a MySQLBackupScheduleInformer.
+	MySQLBackupSchedules() MySQLBackupScheduleInformer
 	// MySQLClusters returns a MySQLClusterInformer.
 	MySQLClusters() MySQLClusterInformer
 }
@@ -39,9 +39,9 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 	return &version{factory: f, namespace: namespace, tweakListOptions: tweakListOptions}
 }
 
-// MySQLBackups returns a MySQLBackupInformer.
-func (v *version) MySQLBackups() MySQLBackupInformer {
-	return &mySQLBackupInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+// MySQLBackupSchedules returns a MySQLBackupScheduleInformer.
+func (v *version) MySQLBackupSchedules() MySQLBackupScheduleInformer {
+	return &mySQLBackupScheduleInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
 }
 
 // MySQLClusters returns a MySQLClusterInformer.

@@ -25,7 +25,7 @@ func RegisterCRD(clientset apiextensions.Interface, filename string) error {
 	return err
 }
 
-// UnregisterCRD removes custom resource definition from kubernetes api.
+// UnregisterCRD removes custom resource definition from the kubernetes api.
 func UnregisterCRD(clientset apiextensions.Interface, crdName string) error {
 	crdInterface := clientset.ApiextensionsV1beta1().CustomResourceDefinitions()
 	return crdInterface.Delete(crdName, nil)

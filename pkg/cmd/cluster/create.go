@@ -13,8 +13,8 @@ import (
 
 	mysqlv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/cmd/util/config"
+	"github.com/grtl/mysql-operator/pkg/cmd/util/fail"
 	"github.com/grtl/mysql-operator/pkg/cmd/util/options"
-	"github.com/grtl/mysql-operator/pkg/cmd/util/util"
 )
 
 var (
@@ -37,7 +37,7 @@ You can specify your own secret using the from-secret flag:
 msp cluster create "my-cluster" --from-secret "my-secret"
 or create a new secret using the secret and password flags:
 msp cluster create "my-cluster" --secret "your-new-secret" --password "mysql-password"
-In order to create a cluster from the backup use the backup and instance flags:
+In order to create a cluster from a backupschedule use the backup and instance flags:
 msp cluster create "my-cluster" --backup "backup-name" --instance "instance"`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -52,7 +52,7 @@ msp cluster create "my-cluster" --backup "backup-name" --instance "instance"`,
 			}
 			err := createSecret(options)
 			if err != nil {
-				util.FailWithError(err)
+				fail.Error(err)
 			}
 		} else {
 			secretName = fromSecret
@@ -60,7 +60,7 @@ msp cluster create "my-cluster" --backup "backup-name" --instance "instance"`,
 
 		err := createMySQLCluster(args[0], options)
 		if err != nil {
-			util.FailWithError(err)
+			fail.Error(err)
 		}
 	},
 }
@@ -73,9 +73,9 @@ func init() {
 		"", "password your-password")
 	clusterCreateCmd.Flags().Int32Var(&replicas, "replicas", mysqlv1.DefaultReplicas, "replicas number")
 	clusterCreateCmd.Flags().StringVar(&secretName, "secret", "", "secret secrete-name")
-	clusterCreateCmd.Flags().StringVar(&backupName, "backup", "", "backup backup-name")
+	clusterCreateCmd.Flags().StringVar(&backupName, "backupschedule", "", "backupschedule backupschedule-name")
 	clusterCreateCmd.Flags().StringVar(&backupInstance, "instance",
-		"", "instance backup-instance")
+		"", "instance backupschedule-instance")
 	clusterCreateCmd.Flags().StringVar(&fromSecret, "from-secret", "", "from-secret secret-name")
 	clusterCreateCmd.Flags().StringVarP(&image, "image", "i",
 		mysqlv1.DefaultImage, "image your-image")

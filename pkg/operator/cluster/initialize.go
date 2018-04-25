@@ -11,7 +11,7 @@ import (
 // CreateConfigMap registers a "mysql" config map used by MySQL Clusters.
 func CreateConfigMap(clientset kubernetes.Interface) error {
 	configMap := new(corev1.ConfigMap)
-	err := util.ObjectFromFile("artifacts/mysql-configmap.yaml", configMap)
+	err := util.ObjectFromFile("artifacts/cluster-configmap.yaml", configMap)
 	if err != nil {
 		return err
 	}

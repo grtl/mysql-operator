@@ -96,11 +96,11 @@ var _ = Describe("Logging", func() {
 			})
 		})
 
-		Describe("and error occurs", func() {
+		Describe("and fail occurs", func() {
 			It("event should be logged", func(done Done) {
 				var event controller.Event
 
-				clusterController.SetError(fmt.Errorf("Testing error"))
+				clusterController.SetError(fmt.Errorf("Testing fail"))
 
 				ctx, cancelFunc := context.WithCancel(context.Background())
 				go clusterController.Run(ctx)
@@ -121,11 +121,11 @@ var _ = Describe("Logging", func() {
 					}),
 				}))
 
-				By("outputting an error after processing failed")
+				By("outputting an fail after processing failed")
 				secondEntry := logrusHook.AllEntries()[1]
 				Expect(*secondEntry).To(gstruct.MatchFields(gstruct.IgnoreExtras, gstruct.Fields{
 					"Level":   Equal(logrus.ErrorLevel),
-					"Message": Equal("Testing error"),
+					"Message": Equal("Testing fail"),
 					"Data": Equal(logrus.Fields{
 						"event":   ClusterAdded,
 						"cluster": cluster.Name,

@@ -25,7 +25,7 @@ import (
 
 type CrV1Interface interface {
 	RESTClient() rest.Interface
-	MySQLBackupsGetter
+	MySQLBackupSchedulesGetter
 	MySQLClustersGetter
 }
 
@@ -34,8 +34,8 @@ type CrV1Client struct {
 	restClient rest.Interface
 }
 
-func (c *CrV1Client) MySQLBackups(namespace string) MySQLBackupInterface {
-	return newMySQLBackups(c, namespace)
+func (c *CrV1Client) MySQLBackupSchedules(namespace string) MySQLBackupScheduleInterface {
+	return newMySQLBackupSchedules(c, namespace)
 }
 
 func (c *CrV1Client) MySQLClusters(namespace string) MySQLClusterInterface {

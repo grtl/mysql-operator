@@ -1,0 +1,50 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ CronJobName .Name }}
+  ownerReferences:
+    - kind: MySQLBackupSchedule
+      apiVersion: cr.mysqloperator.grtl.github.com/v1
+      name: {{ .Name }}
+      uid: {{ .UID }}
+spec:
+  schedule: "{{ .Spec.Time }}"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+          - name: backup
+            persistentVolumeClaim:
+              claimName: {{ PVCName .Name }}
+          - name: conf
+            emptyDir: {}
+          - name: config-map
+            configMap:
+              name: mysql
+          containers:
+          - name: backup
+            image: grtl/xtrabackup:latest
+            command:
+            - bash
+            - "-c"
+            - |
+              set -ex
+
+              # Clone data from master.
+              DATE=`date '+%Y-%m-%d-%H-%M'`
+              mkdir /mysql/backup/{{ .Name }}/${DATE}
+              ncat --recv-only {{ .Spec.Cluster }}-0.{{ .Spec.Cluster }} 3307 | xbstream -x -C /mysql/backup/{{ .Name }}/${DATE}
+
+              # Prepare the backup.
+              xtrabackup --prepare --target-dir=mysql/backup/{{ .Name }}/${DATE}
+            volumeMounts:
+            - name: backup
+              mountPath: /mysql/backup/{{ .Name }}
+            - name: conf
+              mountPath: /etc/mysql/conf.d
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 100Mi

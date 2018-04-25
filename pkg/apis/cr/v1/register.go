@@ -33,8 +33,8 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		new(MySQLCluster),
 		new(MySQLClusterList),
-		new(MySQLBackup),
-		new(MySQLBackupList),
+		new(MySQLBackupSchedule),
+		new(MySQLBackupScheduleList),
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

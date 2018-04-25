@@ -15,9 +15,9 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
-	"github.com/grtl/mysql-operator/pkg/controller/backup"
+	"github.com/grtl/mysql-operator/pkg/controller/backupschedule"
 	"github.com/grtl/mysql-operator/pkg/controller/cluster"
-	backupcrd "github.com/grtl/mysql-operator/pkg/crd/backup"
+	backupcrd "github.com/grtl/mysql-operator/pkg/crd/backupschedule"
 	clustercrd "github.com/grtl/mysql-operator/pkg/crd/cluster"
 	operator "github.com/grtl/mysql-operator/pkg/operator/cluster"
 )
@@ -65,9 +65,9 @@ func main() {
 	clusterController := cluster.NewClusterController(clientset, kubeClientset)
 	go clusterController.Run(ctx)
 
-	logrus.Debug("Starting the backup controller")
-	backupController := backup.NewBackupController(clientset, kubeClientset)
-	go backupController.Run(ctx)
+	logrus.Debug("Starting the backup schedule controller")
+	backupScheduleController := backupschedule.NewBackupScheduleController(clientset, kubeClientset)
+	go backupScheduleController.Run(ctx)
 
 	logrus.Info("Listening for events")
 
@@ -105,7 +105,7 @@ func initializeObjects() error {
 		return err
 	}
 
-	err = backupcrd.CreateBackupCRD(extClientset)
+	err = backupcrd.CreateBackupScheduleCRD(extClientset)
 	if err != nil {
 		return err
 	}
