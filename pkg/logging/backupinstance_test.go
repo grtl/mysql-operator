@@ -22,7 +22,7 @@ var _ = Describe("Backup Schedule", func() {
 
 	var (
 		logrusHook *test.Hook
-		backup     *crv1.MySQLBackupSchedule
+		backup     *crv1.MySQLBackupInstance
 	)
 
 	BeforeEach(func() {
@@ -30,56 +30,56 @@ var _ = Describe("Backup Schedule", func() {
 		logrusHook = test.NewGlobal()
 		logrus.SetLevel(logrus.DebugLevel)
 
-		// Setup fake backupSchedule
-		backup = new(crv1.MySQLBackupSchedule)
-		err := factory.Build(testingFactory.MySQLBackupScheduleFactory).To(backup)
+		// Setup fake backupInstance
+		backup = new(crv1.MySQLBackupInstance)
+		err := factory.Build(testingFactory.MySQLBackupInstanceFactory).To(backup)
 		Expect(err).NotTo(HaveOccurred())
 	})
 
 	Context("Debug", func() {
 		It("should log with debug level", func() {
-			LogBackupSchedule(backup).Debug("Debug")
+			LogBackupInstance(backup).Debug("Debug")
 			Expect(logrusHook.Entries).To(HaveLen(1))
 			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.DebugLevel))
 			Expect(logrusHook.LastEntry().Message).To(Equal("Debug"))
 			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
-				"backupSchedule": backup.Name,
+				"backupInstance": backup.Name,
 			}))
 		})
 	})
 
 	Context("Info", func() {
 		It("should log with info level", func() {
-			LogBackupSchedule(backup).Info("Info")
+			LogBackupInstance(backup).Info("Info")
 			Expect(logrusHook.Entries).To(HaveLen(1))
 			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.InfoLevel))
 			Expect(logrusHook.LastEntry().Message).To(Equal("Info"))
 			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
-				"backupSchedule": backup.Name,
+				"backupInstance": backup.Name,
 			}))
 		})
 	})
 
 	Context("Warn", func() {
 		It("should log with warn level", func() {
-			LogBackupSchedule(backup).Warn("Warn")
+			LogBackupInstance(backup).Warn("Warn")
 			Expect(logrusHook.Entries).To(HaveLen(1))
 			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.WarnLevel))
 			Expect(logrusHook.LastEntry().Message).To(Equal("Warn"))
 			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
-				"backupSchedule": backup.Name,
+				"backupInstance": backup.Name,
 			}))
 		})
 	})
 
 	Context("Error", func() {
 		It("should log with fail level", func() {
-			LogBackupSchedule(backup).Error("Error")
+			LogBackupInstance(backup).Error("Error")
 			Expect(logrusHook.Entries).To(HaveLen(1))
 			Expect(logrusHook.LastEntry().Level).To(Equal(logrus.ErrorLevel))
 			Expect(logrusHook.LastEntry().Message).To(Equal("Error"))
 			Expect(logrusHook.LastEntry().Data).To(Equal(logrus.Fields{
-				"backupSchedule": backup.Name,
+				"backupInstance": backup.Name,
 			}))
 		})
 	})
