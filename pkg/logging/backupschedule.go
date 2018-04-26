@@ -6,8 +6,8 @@ import (
 )
 
 // LogBackupSchedule injects Backup Schedule data into logrus fields.
-func LogBackupSchedule(backup *crv1.MySQLBackupSchedule) *logrus.Entry {
+func LogBackupSchedule(schedule *crv1.MySQLBackupSchedule) *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{
-		"backupSchedule": backup.Name,
+		"backupSchedule": schedule.Name,
 	})
 }

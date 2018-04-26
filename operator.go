@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
+	"github.com/grtl/mysql-operator/pkg/controller/backupinstance"
 	"github.com/grtl/mysql-operator/pkg/controller/backupschedule"
 	"github.com/grtl/mysql-operator/pkg/controller/cluster"
 	backupinstancecrd "github.com/grtl/mysql-operator/pkg/crd/backupinstance"
@@ -69,6 +70,10 @@ func main() {
 	logrus.Debug("Starting the backup schedule controller")
 	backupScheduleController := backupschedule.NewBackupScheduleController(clientset, kubeClientset)
 	go backupScheduleController.Run(ctx)
+
+	logrus.Debug("Starting the backup instance controller")
+	backupInstanceController := backupinstance.NewBackupInstanceController(clientset, kubeClientset)
+	go backupInstanceController.Run(ctx)
 
 	logrus.Info("Listening for events")
 
