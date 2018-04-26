@@ -6,10 +6,11 @@ import (
 )
 
 // FuncMap can be used to execute templates with the helper functions from the
-// Backup Shcedule operator fail.
+// Backup Schedule operator.
 var FuncMap = template.FuncMap{
-	"CronJobName": CronJobName,
-	"PVCName":     PVCName,
+	"CronJobName":              CronJobName,
+	"PVCName":                  PVCName,
+	"BackupInstanceNamePrefix": BackupInstanceNamePrefix,
 }
 
 // CronJobName returns a name for a cron job associated with the given
@@ -20,5 +21,10 @@ func CronJobName(scheduleName string) string {
 
 // PVCName returns a name for a PVC associated with the given backupName.
 func PVCName(scheduleName string) string {
+	return scheduleName
+}
+
+// BackupInstanceNamePrefix returns a name prefix for a backup instance.
+func BackupInstanceNamePrefix(scheduleName string) string {
 	return scheduleName
 }

@@ -35,6 +35,7 @@ type MySQLBackupInstancesGetter interface {
 type MySQLBackupInstanceInterface interface {
 	Create(*v1.MySQLBackupInstance) (*v1.MySQLBackupInstance, error)
 	Update(*v1.MySQLBackupInstance) (*v1.MySQLBackupInstance, error)
+	UpdateStatus(*v1.MySQLBackupInstance) (*v1.MySQLBackupInstance, error)
 	Delete(name string, options *meta_v1.DeleteOptions) error
 	DeleteCollection(options *meta_v1.DeleteOptions, listOptions meta_v1.ListOptions) error
 	Get(name string, options meta_v1.GetOptions) (*v1.MySQLBackupInstance, error)
@@ -112,6 +113,22 @@ func (c *mySQLBackupInstances) Update(mySQLBackupInstance *v1.MySQLBackupInstanc
 		Namespace(c.ns).
 		Resource("mysqlbackupinstances").
 		Name(mySQLBackupInstance.Name).
+		Body(mySQLBackupInstance).
+		Do().
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *mySQLBackupInstances) UpdateStatus(mySQLBackupInstance *v1.MySQLBackupInstance) (result *v1.MySQLBackupInstance, err error) {
+	result = &v1.MySQLBackupInstance{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("mysqlbackupinstances").
+		Name(mySQLBackupInstance.Name).
+		SubResource("status").
 		Body(mySQLBackupInstance).
 		Do().
 		Into(result)

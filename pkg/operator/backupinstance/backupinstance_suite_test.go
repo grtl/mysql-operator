@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestBackupSchedule(t *testing.T) {
+func TestBackupInstance(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Controller Backup Instance Suite")
+	RunSpecs(t, "Operator Backup Instance Suite")
 }

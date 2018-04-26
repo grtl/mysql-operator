@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ JobCreateName .Name }}
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+      - name: backup
+        persistentVolumeClaim:
+          claimName: {{ PVCName .Spec.Schedule }}
+      - name: conf
+        emptyDir: {}
+      - name: config-map
+        configMap:
+          name: mysql
+      containers:
+      - name: backup
+        image: grtl/xtrabackup:latest
+        command:
+        - bash
+        - "-c"
+        - |
+          set -ex
+
+          kubectl patch mysqlbackupinstance {{ .Name }} --type='merge' --patch '{"status": {"phase": "Started"}}'
+
+          BACKUP_DIR="/mysql/backup/{{ PVCName .Spec.Schedule }}/{{ .Name }}"
+
+          # Clone data from master.
+          mkdir -p ${BACKUP_DIR}
+          ncat --recv-only {{ .Spec.Cluster }}-0.{{ .Spec.Cluster }} 3307 | xbstream -x -C ${BACKUP_DIR}
+
+          # Prepare the backup.
+          xtrabackup --prepare --target-dir=${BACKUP_DIR}
+
+          kubectl patch mysqlbackupinstance {{ .Name }} --type='merge' --patch '{"status": {"phase": "Completed"}}'
+        volumeMounts:
+        - name: backup
+          mountPath: /mysql/backup/{{ PVCName .Spec.Schedule }}
+        - name: conf
+          mountPath: /etc/mysql/conf.d
+          resources:
+            requests:
+              cpu: 100m
+              memory: 100Mi

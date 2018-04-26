@@ -10,22 +10,23 @@ import (
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/pkg/client/informers/externalversions"
 	"github.com/grtl/mysql-operator/pkg/controller"
+	"github.com/grtl/mysql-operator/pkg/logging"
 	operator "github.com/grtl/mysql-operator/pkg/operator/backupschedule"
 )
 
 // NewBackupScheduleController returns new BackupSchedule controller.
 func NewBackupScheduleController(clientset versioned.Interface, kubeClientset kubernetes.Interface) controller.Controller {
 	return &backupScheduleController{
-		Base:           controller.NewControllerBase(),
-		clientset:      clientset,
-		backupOperator: operator.NewBackupScheduleOperator(clientset, kubeClientset),
+		Base:      controller.NewControllerBase(),
+		clientset: clientset,
+		operator:  operator.NewBackupScheduleOperator(clientset, kubeClientset),
 	}
 }
 
 type backupScheduleController struct {
 	controller.Base
-	clientset      versioned.Interface
-	backupOperator operator.Operator
+	clientset versioned.Interface
+	operator  operator.Operator
 }
 
 func (c *backupScheduleController) Run(ctx context.Context) error {
@@ -46,12 +47,12 @@ func (c *backupScheduleController) onAdd(obj interface{}) {
 
 	logBackupScheduleEventBegin(schedule, BackupScheduleAdded)
 
-	err := c.backupOperator.AddBackupSchedule(schedule)
+	err := c.operator.AddBackupSchedule(schedule)
 	if err != nil {
-		return
+		logging.LogBackupSchedule(schedule).WithField("event", BackupScheduleAdded).Error(err)
+	} else {
+		logBackupScheduleEventSuccess(schedule, BackupScheduleAdded)
 	}
-
-	logBackupScheduleEventSuccess(schedule, BackupScheduleAdded)
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {

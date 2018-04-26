@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
+	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned/fake"
 	"github.com/grtl/mysql-operator/pkg/controller"
 	testingFactory "github.com/grtl/mysql-operator/pkg/testing/factory"
 )
@@ -24,8 +25,10 @@ var _ = Describe("Backup Instance Controller", func() {
 	logrus.SetOutput(ioutil.Discard)
 
 	var (
-		backup *crv1.MySQLBackupInstance
+		schedule *crv1.MySQLBackupSchedule
+		backup   *crv1.MySQLBackupInstance
 
+		clientset          *fake.Clientset
 		watcher            *watch.FakeWatcher
 		scheduleController controller.Controller
 		eventsHook         controller.EventsHook
@@ -33,12 +36,21 @@ var _ = Describe("Backup Instance Controller", func() {
 
 	BeforeEach(func() {
 		// Initialize the controller
-		watcher, scheduleController = NewFakeBackupInstanceController(16)
+		clientset, watcher, scheduleController = NewFakeBackupInstanceController(16)
 		eventsHook = controller.NewEventsHook(16)
+
+		// Setup fake Backup Schedule
+		schedule = new(crv1.MySQLBackupSchedule)
+		err := factory.Build(testingFactory.MySQLBackupScheduleFactory).To(schedule)
+		Expect(err).NotTo(HaveOccurred())
+
+		_, err = clientset.CrV1().MySQLBackupSchedules(schedule.Namespace).Create(schedule)
+		Expect(err).NotTo(HaveOccurred())
 
 		// Setup fake Backup Instance
 		backup = new(crv1.MySQLBackupInstance)
-		err := factory.Build(testingFactory.MySQLBackupInstanceFactory).To(backup)
+		err = factory.Build(testingFactory.MySQLBackupInstanceFactory,
+			factory.WithField("Spec.Schedule", schedule.Name)).To(backup)
 		Expect(err).NotTo(HaveOccurred())
 	})
 

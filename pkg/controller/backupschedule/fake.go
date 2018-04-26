@@ -20,6 +20,6 @@ func NewFakeBackupScheduleController(size int) (*watch.FakeWatcher, controller.C
 	watcher := watch.NewFakeWithChanSize(size, false)
 	clientset.PrependWatchReactor("mysqlbackupschedules", testing.DefaultWatchReactor(watcher, nil))
 	fakeController := NewBackupScheduleController(clientset, kubeClientset)
-	fakeController.(*backupScheduleController).backupOperator = operator.NewFakeOperator()
+	fakeController.(*backupScheduleController).operator = operator.NewFakeOperator()
 	return watcher, fakeController
 }
