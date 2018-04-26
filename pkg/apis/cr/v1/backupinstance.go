@@ -5,7 +5,6 @@ import (
 )
 
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // MySQLBackupInstance represents an already created backup.
@@ -13,8 +12,22 @@ type MySQLBackupInstance struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
 
-	Spec MySQLBackupInstanceSpec `json:"spec"`
+	Spec   MySQLBackupInstanceSpec   `json:"spec"`
+	Status MySQLBackupInstanceStatus `json:"status,omitempty"`
 }
+
+type MySQLBackupInstanceStatus struct {
+	Phase MySQLBackupInstanceStatusPhase `json:"phase"`
+}
+
+type MySQLBackupInstanceStatusPhase string
+
+const (
+	MySQLBackupScheduled MySQLBackupInstanceStatusPhase = "Scheduled"
+	MySQLBackupStarted   MySQLBackupInstanceStatusPhase = "Started"
+	MySQLBackupFailed    MySQLBackupInstanceStatusPhase = "Failed"
+	MySQLBackupCompleted MySQLBackupInstanceStatusPhase = "Completed"
+)
 
 // MySQLBackupInstanceSpec stores the properties of a backup.
 type MySQLBackupInstanceSpec struct {

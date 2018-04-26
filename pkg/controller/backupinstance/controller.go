@@ -10,6 +10,8 @@ import (
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
 	"github.com/grtl/mysql-operator/pkg/client/informers/externalversions"
 	"github.com/grtl/mysql-operator/pkg/controller"
+	"github.com/grtl/mysql-operator/pkg/logging"
+	"github.com/grtl/mysql-operator/pkg/operator/backupinstance"
 )
 
 // NewBackupInstanceController returns new backup instance controller.
@@ -17,12 +19,14 @@ func NewBackupInstanceController(clientset versioned.Interface, kubeClientset ku
 	return &backupInstanceController{
 		Base:      controller.NewControllerBase(),
 		clientset: clientset,
+		operator:  backupinstance.NewBackupInstanceOperator(clientset, kubeClientset),
 	}
 }
 
 type backupInstanceController struct {
 	controller.Base
 	clientset versioned.Interface
+	operator  backupinstance.Operator
 }
 
 func (c *backupInstanceController) Run(ctx context.Context) error {
@@ -43,7 +47,12 @@ func (c *backupInstanceController) onAdd(obj interface{}) {
 
 	logBackupInstanceEventBegin(backup, BackupInstanceAdded)
 
-	logBackupInstanceEventSuccess(backup, BackupInstanceAdded)
+	err := c.operator.CreateBackup(backup)
+	if err != nil {
+		logging.LogBackupInstance(backup).WithField("event", BackupInstanceAdded).Error(err)
+	} else {
+		logBackupInstanceEventSuccess(backup, BackupInstanceAdded)
+	}
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {
@@ -69,7 +78,12 @@ func (c *backupInstanceController) onDelete(obj interface{}) {
 
 	logBackupInstanceEventBegin(backup, BackupInstanceDeleted)
 
-	logBackupInstanceEventSuccess(backup, BackupInstanceDeleted)
+	err := c.operator.DeleteBackup(backup)
+	if err != nil {
+		logging.LogBackupInstance(backup).WithField("event", BackupInstanceDeleted).Error(err)
+	} else {
+		logBackupInstanceEventSuccess(backup, BackupInstanceDeleted)
+	}
 
 	// Run hooks
 	for _, hook := range c.GetHooks() {

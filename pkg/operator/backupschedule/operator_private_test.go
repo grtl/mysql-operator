@@ -13,7 +13,7 @@ import (
 	testingFactory "github.com/grtl/mysql-operator/pkg/testing/factory"
 )
 
-var _ = Describe("Operator", func() {
+var _ = Describe("Operator Backup Schedule Private", func() {
 	var schedule *crv1.MySQLBackupSchedule
 
 	BeforeEach(func() {

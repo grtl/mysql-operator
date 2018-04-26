@@ -39,9 +39,8 @@ func NewBackupScheduleOperator(clientset versioned.Interface, kubeClientset kube
 }
 
 func (b *backupScheduleOperator) AddBackupSchedule(schedule *crv1.MySQLBackupSchedule) error {
-	clusterName := schedule.Spec.Cluster
-	cluster, err := b.clientset.CrV1().MySQLClusters(metav1.NamespaceDefault).
-		Get(clusterName, metav1.GetOptions{})
+	clustersInterface := b.clientset.CrV1().MySQLClusters(schedule.Namespace)
+	cluster, err := clustersInterface.Get(schedule.Spec.Cluster, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -60,7 +59,7 @@ func (b *backupScheduleOperator) AddBackupSchedule(schedule *crv1.MySQLBackupSch
 	err = b.createCronJob(schedule)
 	if err != nil {
 		// Cleanup - remove already created PVC
-		logging.LogBackupSchedule(schedule).WithField("fail", err).Warn("Reverting PVC creation.")
+		logging.LogBackupSchedule(schedule).WithField("error", err).Warn("Reverting PVC creation.")
 		removeErr := b.removePVC(schedule)
 		return errors.NewAggregate([]error{err, removeErr})
 	}

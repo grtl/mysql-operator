@@ -1,0 +1,22 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ JobDeleteName .Name }}
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+      - name: backup
+        persistentVolumeClaim:
+          claimName: {{ PVCName .Spec.Schedule }}
+      containers:
+      - name: backup
+        image: busybox
+        command:
+        - rm
+        - "-r"
+        - /mysql/backup/{{ PVCName .Spec.Schedule }}/{{ .Name }}
+        volumeMounts:
+        - name: backup
+          mountPath: /mysql/backup/{{ PVCName .Spec.Schedule }}

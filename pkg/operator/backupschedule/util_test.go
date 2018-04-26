@@ -24,4 +24,11 @@ var _ = Describe("Util", func() {
 			Expect(PVCName(anotherScheduleName)).To(Equal("another-backup"))
 		})
 	})
+
+	Describe("BackupInstanceNamePrefix", func() {
+		It("should generate a name prefix for the backup instance", func() {
+			Expect(BackupInstanceNamePrefix(scheduleName)).To(Equal("my-backup"))
+			Expect(BackupInstanceNamePrefix(anotherScheduleName)).To(Equal("another-backup"))
+		})
+	})
 })
