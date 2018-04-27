@@ -18,15 +18,14 @@ import (
 )
 
 var (
-	replicas       int32
-	password       string
-	storage        string
-	secretName     string
-	backupName     string
-	backupInstance string
-	fromSecret     string
-	port           int32
-	image          string
+	replicas   int32
+	password   string
+	storage    string
+	secretName string
+	backupName string
+	fromSecret string
+	port       int32
+	image      string
 )
 
 var clusterCreateCmd = &cobra.Command{
@@ -37,8 +36,8 @@ You can specify your own secret using the from-secret flag:
 msp cluster create "my-cluster" --from-secret "my-secret"
 or create a new secret using the secret and password flags:
 msp cluster create "my-cluster" --secret "your-new-secret" --password "mysql-password"
-In order to create a cluster from a backupschedule use the backup and instance flags:
-msp cluster create "my-cluster" --backup "backup-name" --instance "instance"`,
+In order to create a cluster from a backupinstance use the backup flag:
+msp cluster create "my-cluster" --backup "backup-name"`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		options := options.ExtractOptions(cmd)
@@ -73,9 +72,7 @@ func init() {
 		"", "password your-password")
 	clusterCreateCmd.Flags().Int32Var(&replicas, "replicas", mysqlv1.DefaultReplicas, "replicas number")
 	clusterCreateCmd.Flags().StringVar(&secretName, "secret", "", "secret secrete-name")
-	clusterCreateCmd.Flags().StringVar(&backupName, "backupschedule", "", "backupschedule backupschedule-name")
-	clusterCreateCmd.Flags().StringVar(&backupInstance, "instance",
-		"", "instance backupschedule-instance")
+	clusterCreateCmd.Flags().StringVar(&backupName, "backup", "", "backup backupinstance-name")
 	clusterCreateCmd.Flags().StringVar(&fromSecret, "from-secret", "", "from-secret secret-name")
 	clusterCreateCmd.Flags().StringVarP(&image, "image", "i",
 		mysqlv1.DefaultImage, "image your-image")
@@ -115,15 +112,12 @@ func createMySQLCluster(clusterName string, options *options.Options) error {
 			Name: clusterName,
 		},
 		Spec: mysqlv1.MySQLClusterSpec{
-			Secret:   secretName,
-			Storage:  storageQuantity,
-			Replicas: replicas,
-			Port:     port,
-			Image:    image,
-			FromBackup: mysqlv1.BackupInstance{
-				BackupName: backupName,
-				Instance:   backupInstance,
-			},
+			Secret:     secretName,
+			Storage:    storageQuantity,
+			Replicas:   replicas,
+			Port:       port,
+			Image:      image,
+			FromBackup: backupName,
 		},
 	})
 

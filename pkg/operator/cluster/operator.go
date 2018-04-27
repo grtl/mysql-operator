@@ -137,8 +137,22 @@ func (c *clusterOperator) createService(cluster *crv1.MySQLCluster, filename str
 }
 
 func (c *clusterOperator) createStatefulSet(cluster *crv1.MySQLCluster) error {
+	var (
+		backup *crv1.MySQLBackupInstance
+		err    error
+	)
+
+	// If we're creating cluster for backup fetch the backup
+	if cluster.Spec.FromBackup != "" {
+		backup, err = c.clientset.CrV1().MySQLBackupInstances(cluster.Namespace).
+			Get(cluster.Spec.FromBackup, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+	}
+
 	statefulSetInterface := c.kubeClientset.AppsV1().StatefulSets(cluster.Namespace)
-	statefulSet, err := statefulSetForCluster(cluster)
+	statefulSet, err := statefulSetForCluster(cluster, backup)
 	if err != nil {
 		return err
 	}
@@ -184,13 +198,12 @@ func updateService(cluster *crv1.MySQLCluster, serviceInterface typedv1.ServiceI
 
 func (c *clusterOperator) updateStatefulSet(cluster *crv1.MySQLCluster) error {
 	statefulSetInterface := c.kubeClientset.AppsV1().StatefulSets(cluster.Namespace)
-	statefulSet, err := statefulSetForCluster(cluster)
+	statefulSet, err := statefulSetForCluster(cluster, nil)
 	if err != nil {
 		return err
 	}
 
 	_, err = statefulSetInterface.Update(statefulSet)
-
 	return err
 }
 
@@ -200,9 +213,15 @@ func serviceForCluster(cluster *crv1.MySQLCluster, filename string) (*corev1.Ser
 	return service, err
 }
 
-func statefulSetForCluster(cluster *crv1.MySQLCluster) (*appsv1.StatefulSet, error) {
+func statefulSetForCluster(cluster *crv1.MySQLCluster, backup *crv1.MySQLBackupInstance) (*appsv1.StatefulSet, error) {
 	statefulSet := new(appsv1.StatefulSet)
-	err := util.ObjectFromTemplate(cluster, statefulSet, statefulSetTemplate, FuncMap)
+	err := util.ObjectFromTemplate(struct {
+		*crv1.MySQLCluster
+		BackupInstance *crv1.MySQLBackupInstance
+	}{
+		cluster,
+		backup,
+	}, statefulSet, statefulSetTemplate, FuncMap)
 	return statefulSet, err
 }
 

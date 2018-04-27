@@ -28,7 +28,7 @@ var _ = Describe("Operator", func() {
 
 		BeforeEach(func() {
 			var err error
-			statefulSet, err = statefulSetForCluster(cluster)
+			statefulSet, err = statefulSetForCluster(cluster, nil)
 			Expect(err).NotTo(HaveOccurred())
 		})
 

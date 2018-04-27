@@ -26,7 +26,7 @@ spec:
 
           kubectl patch mysqlbackupinstance {{ .Name }} --type='merge' --patch '{"status": {"phase": "Started"}}'
 
-          BACKUP_DIR="/mysql/backup/{{ PVCName .Spec.Schedule }}/{{ .Name }}"
+          BACKUP_DIR="/mysql/backup/{{ .Name }}"
 
           # Clone data from master.
           mkdir -p ${BACKUP_DIR}
@@ -38,7 +38,7 @@ spec:
           kubectl patch mysqlbackupinstance {{ .Name }} --type='merge' --patch '{"status": {"phase": "Completed"}}'
         volumeMounts:
         - name: backup
-          mountPath: /mysql/backup/{{ PVCName .Spec.Schedule }}
+          mountPath: /mysql/backup/
         - name: conf
           mountPath: /etc/mysql/conf.d
           resources:

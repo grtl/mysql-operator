@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// LogBackupSchedule injects Backup Schedule data into logrus fields.
+// LogBackupInstance injects Backup Instance data into logrus fields.
 func LogBackupInstance(backup *crv1.MySQLBackupInstance) *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{
 		"backupInstance": backup.Name,

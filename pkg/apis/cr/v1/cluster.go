@@ -38,7 +38,7 @@ type MySQLClusterSpec struct {
 	// Image allows to specify mysql image
 	Image string `json:"image,omitempty"`
 	// FromBackup lets you specify the backup name to restore the cluster from.
-	FromBackup BackupInstance `json:"fromBackup,omitempty"`
+	FromBackup string `json:"fromBackup,omitempty"`
 }
 
 // MySQLClusterStatus represents a cluster's status.
@@ -55,12 +55,6 @@ type MySQLClusterList struct {
 	metav1.ListMeta `json:"metadata"`
 
 	Items []MySQLCluster `json:"items"`
-}
-
-// BackupInstance represents a single backupschedule instance.
-type BackupInstance struct {
-	BackupName string `json:"backupName"`
-	Instance   string `json:"instance"`
 }
 
 // WithDefaults fills cluster missing fields with their default values.

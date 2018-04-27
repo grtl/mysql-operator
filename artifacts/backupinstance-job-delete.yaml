@@ -16,7 +16,7 @@ spec:
         command:
         - rm
         - "-r"
-        - /mysql/backup/{{ PVCName .Spec.Schedule }}/{{ .Name }}
+        - /mysql/backup/{{ .Name }}
         volumeMounts:
         - name: backup
-          mountPath: /mysql/backup/{{ PVCName .Spec.Schedule }}
+          mountPath: /mysql/backup/
