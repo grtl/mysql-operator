@@ -56,7 +56,7 @@ spec:
           ordinal=${BASH_REMATCH[1]}
           # Restore data from backup on master.
           if [[ $ordinal -eq 0 ]]; then
-            {{ if ne .Spec.FromBackup.BackupName "" }}
+            {{ if ne .Spec.FromBackup "" }}
             # Restore data from backup on master.
             xtrabackup --prepare --target-dir=/mysql/backup/
             xtrabackup --copy-back --target-dir=/mysql/backup/
@@ -74,10 +74,10 @@ spec:
           subPath: mysql
         - name: conf
           mountPath: /etc/mysql/conf.d
-        {{ if ne .Spec.FromBackup.BackupName "" }}
+        {{ if ne .Spec.FromBackup "" }}
         - name: restore
           mountPath: /mysql/backup
-          subPath: {{ .Spec.FromBackup.Instance }}
+          subPath: {{ .BackupInstance.Name }}
         {{ end }}
       containers:
       - name: mysql
@@ -184,10 +184,10 @@ spec:
       - name: config-map
         configMap:
           name: mysql
-      {{ if ne .Spec.FromBackup.BackupName "" }}
+      {{ if ne .Spec.FromBackup "" }}
       - name: restore
         persistentVolumeClaim:
-          claimName: {{ .Spec.FromBackup.BackupName }}
+          claimName: {{ PVCName .BackupInstance.Spec.Schedule }}
       {{ end }}
   volumeClaimTemplates:
   - metadata:

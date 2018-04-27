@@ -3,11 +3,14 @@ package cluster
 import (
 	"fmt"
 	"text/template"
+
+	"github.com/grtl/mysql-operator/pkg/operator/backupschedule"
 )
 
 // FuncMap can be used to execute templates with the helper functions from
 // the cluster operator.
 var FuncMap = template.FuncMap{
+	"PVCName":         backupschedule.PVCName,
 	"StatefulSetName": StatefulSetName,
 	"ServiceName":     ServiceName,
 	"ReadServiceName": ReadServiceName,

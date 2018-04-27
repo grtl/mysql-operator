@@ -16,12 +16,15 @@ type MySQLBackupInstance struct {
 	Status MySQLBackupInstanceStatus `json:"status,omitempty"`
 }
 
+// MySQLBackupInstanceStatus represents a backup instance status.
 type MySQLBackupInstanceStatus struct {
 	Phase MySQLBackupInstanceStatusPhase `json:"phase"`
 }
 
+// MySQLBackupInstanceStatusPhase represents a backup instance phase.
 type MySQLBackupInstanceStatusPhase string
 
+// Available MySQLBackupInstanceStatusPhase phases.
 const (
 	MySQLBackupScheduled MySQLBackupInstanceStatusPhase = "Scheduled"
 	MySQLBackupStarted   MySQLBackupInstanceStatusPhase = "Started"
