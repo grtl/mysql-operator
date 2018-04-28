@@ -14,5 +14,6 @@ spec:
   - name: mysql
     port: {{ .Spec.Port }}
     targetPort: 3306
+  clusterIP: None
   selector:
     app: {{ .Name }}
