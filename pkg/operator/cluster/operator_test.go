@@ -35,11 +35,17 @@ var _ = Describe("Cluster Operator", func() {
 
 	BeforeEach(func() {
 		cluster = new(crv1.MySQLCluster)
-		err := factory.Build(testingFactory.MySQLClusterFactory).To(cluster)
+		err := factory.Build(testingFactory.MySQLClusterFactory,
+			factory.WithTraits("ChangeDefaults"),
+		).To(cluster)
 		Expect(err).NotTo(HaveOccurred())
 
 		clientset = versioned.NewSimpleClientset()
 		kubeClientset = fake.NewSimpleClientset()
+
+		clusters := clientset.CrV1().MySQLClusters("default")
+		_, err = clusters.Create(cluster)
+		Expect(err).NotTo(HaveOccurred())
 
 		operator = NewClusterOperator(clientset, kubeClientset)
 
@@ -115,6 +121,48 @@ var _ = Describe("Cluster Operator", func() {
 				Equal(apicorev1.ResourceList{
 					"storage": cluster.Spec.Storage,
 				}))
+		})
+	})
+
+	When("a cluster is updated", func() {
+		var updatedCluster *crv1.MySQLCluster
+
+		BeforeEach(func() {
+			updatedCluster = new(crv1.MySQLCluster)
+			updatedCluster = cluster.DeepCopy()
+			updatedCluster.Spec.Port = updatedCluster.Spec.Port + 1
+			updatedCluster.Spec.Replicas = updatedCluster.Spec.Replicas + 1
+		})
+
+		JustBeforeEach(func() {
+			err := operator.UpdateCluster(updatedCluster)
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("updates the StatefulSet", func() {
+			sets, err := statefulSets.List(metav1.ListOptions{})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sets.Items).To(HaveLen(1))
+			sts := sets.Items[0]
+			Expect(*sts.Spec.Replicas).To(Equal(cluster.Spec.Replicas + 1))
+		})
+
+		It("updates the StatefulSet", func() {
+			sets, err := statefulSets.List(metav1.ListOptions{})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(sets.Items).To(HaveLen(1))
+			sts := sets.Items[0]
+			Expect(*sts.Spec.Replicas).To(Equal(cluster.Spec.Replicas + 1))
+		})
+
+		It("updates the Services", func() {
+			svcs, err := services.List(metav1.ListOptions{})
+
+			Expect(err).NotTo(HaveOccurred())
+
+			for _, svc := range svcs.Items {
+				Expect(svc.Spec.Ports[0].Port).To(Equal(cluster.Spec.Port + 1))
+			}
 		})
 	})
 })
