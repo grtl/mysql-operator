@@ -7,6 +7,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/client-go/kubernetes"
+	typedv1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	crv1 "github.com/grtl/mysql-operator/pkg/apis/cr/v1"
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
@@ -80,8 +81,21 @@ func (c *clusterOperator) AddCluster(cluster *crv1.MySQLCluster) error {
 func (c *clusterOperator) UpdateCluster(newCluster *crv1.MySQLCluster) error {
 	newCluster.WithDefaults()
 
+	logging.LogCluster(newCluster).Debug("Updating services.")
+	err := c.updateServices(newCluster)
+	if err != nil {
+		logging.LogCluster(newCluster).WithField(
+			"error", err).Warn("Setting status")
+		setStateErr := c.setClusterState(
+			newCluster,
+			"Failed update",
+			"The provided patch resulted in a Service update failure",
+		)
+		return errors.NewAggregate([]error{err, setStateErr})
+	}
+
 	logging.LogCluster(newCluster).Debug("Updating stateful set.")
-	err := c.updateStatefulSet(newCluster)
+	err = c.updateStatefulSet(newCluster)
 	if err != nil {
 		logging.LogCluster(newCluster).WithField(
 			"fail", err).Warn("Setting status")
@@ -137,6 +151,35 @@ func (c *clusterOperator) createStatefulSet(cluster *crv1.MySQLCluster) error {
 	}
 
 	return nil
+}
+
+func (c *clusterOperator) updateServices(cluster *crv1.MySQLCluster) error {
+	serviceInterface := c.kubeClientset.CoreV1().Services(cluster.Namespace)
+
+	err := updateService(cluster, serviceInterface, serviceTemplate)
+	if err != nil {
+		return err
+	}
+
+	return updateService(cluster, serviceInterface, serviceReadTemplate)
+}
+
+func updateService(cluster *crv1.MySQLCluster, serviceInterface typedv1.ServiceInterface, template string) error {
+	service, err := serviceForCluster(cluster, template)
+	if err != nil {
+		return err
+	}
+
+	// Hack! At the moment, when updating a Service, the API will complain about
+	// resourceVersion not being set. This field is documented as read-only.
+	// Setting it manually like this based on the previous value is a workaround
+	// that allows us to update.
+	oldService, err := serviceInterface.Get(service.ObjectMeta.Name, metav1.GetOptions{})
+	service.ObjectMeta.ResourceVersion = oldService.ObjectMeta.ResourceVersion
+
+	_, err = serviceInterface.Update(service)
+
+	return err
 }
 
 func (c *clusterOperator) updateStatefulSet(cluster *crv1.MySQLCluster) error {
