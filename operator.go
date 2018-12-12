@@ -15,6 +15,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/grtl/mysql-operator/pkg/client/clientset/versioned"
+	"github.com/grtl/mysql-operator/pkg/controller"
 	"github.com/grtl/mysql-operator/pkg/controller/backupinstance"
 	"github.com/grtl/mysql-operator/pkg/controller/backupschedule"
 	"github.com/grtl/mysql-operator/pkg/controller/cluster"
@@ -45,19 +46,19 @@ func main() {
 
 	config, err := clientcmd.BuildConfigFromFlags(*master, *kubeconfig)
 	if err != nil {
-		logrus.Panic(err)
+		logrus.WithError(err).Fatal("Unable to build config")
 	}
 
 	logrus.Debug("Initializing clientsets")
 	err = initializeClientSets(config)
 	if err != nil {
-		logrus.Panic(err)
+		logrus.WithError(err).Fatal("Unable to initialize clientsets")
 	}
 
 	logrus.Debug("Initializing objects")
 	err = initializeObjects()
 	if err != nil {
-		logrus.Panic(err)
+		logrus.WithError(err).Fatal("Unable to initialize objects")
 	}
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
@@ -65,15 +66,15 @@ func main() {
 
 	logrus.Debug("Starting the cluster controller")
 	clusterController := cluster.NewClusterController(clientset, kubeClientset)
-	go clusterController.Run(ctx)
+	go runController(clusterController, ctx)
 
 	logrus.Debug("Starting the backup schedule controller")
 	backupScheduleController := backupschedule.NewBackupScheduleController(clientset, kubeClientset)
-	go backupScheduleController.Run(ctx)
+	go runController(backupScheduleController, ctx)
 
 	logrus.Debug("Starting the backup instance controller")
 	backupInstanceController := backupinstance.NewBackupInstanceController(clientset, kubeClientset)
-	go backupInstanceController.Run(ctx)
+	go runController(backupInstanceController, ctx)
 
 	logrus.Info("Listening for events")
 
@@ -85,6 +86,13 @@ func main() {
 			logrus.WithField("signal", s).Info("Received signal")
 			os.Exit(0)
 		}
+	}
+}
+
+func runController(controller controller.Controller, ctx context.Context) {
+	err := controller.Run(ctx)
+	if err != nil {
+		logrus.WithError(err).Fatal("Unable to run the controller")
 	}
 }
 
