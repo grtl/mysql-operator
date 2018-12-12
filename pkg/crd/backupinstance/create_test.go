@@ -7,6 +7,7 @@ import (
 
 	"time"
 
+	corev1 "k8s.io/api/core/v1"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/fake"
 	"k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
@@ -31,7 +32,7 @@ var _ = Describe("CRD Backup Instance Create", func() {
 		It("should register Backup Instance CRD in the clientset", func(done Done) {
 			go func() {
 				defer GinkgoRecover()
-				err := CreateBackupInstanceCRD(clientset)
+				err := CreateBackupInstanceCRD(corev1.NamespaceAll, clientset)
 				Expect(err).NotTo(HaveOccurred())
 				crd, err := crdInterface.Get(CustomResourceName, metav1.GetOptions{})
 				Expect(err).NotTo(HaveOccurred())
@@ -58,7 +59,7 @@ var _ = Describe("CRD Backup Instance Create", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 		It("should finish with no fail", func() {
-			err := CreateBackupInstanceCRD(clientset)
+			err := CreateBackupInstanceCRD(corev1.NamespaceAll, clientset)
 			Expect(err).NotTo(HaveOccurred())
 			crd, err := crdInterface.Get(CustomResourceName, metav1.GetOptions{})
 			Expect(err).NotTo(HaveOccurred())

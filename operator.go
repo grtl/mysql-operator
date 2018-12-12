@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	corev1 "k8s.io/api/core/v1"
 	apiextensions "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -26,9 +27,10 @@ import (
 )
 
 var (
-	kubeconfig = flag.String("kubeconfig", "", "Path to kubeconfig. Only required if out-of-cluster.")
-	master     = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
+	kubeconfig = flag.String("kubeconfig", "", "Path to kubeconfig. Only required if out-of-cluster")
+	master     = flag.String("master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster")
 	debug      = flag.Bool("debug", false, "Show debug logs")
+	namespace  = flag.String("namespace", corev1.NamespaceDefault, "Create/Delete objects only on specific namespace")
 )
 
 var (
@@ -114,20 +116,20 @@ func initializeClientSets(config *rest.Config) error {
 }
 
 func initializeObjects() error {
-	err := clustercrd.CreateClusterCRD(extClientset)
+	err := clustercrd.CreateClusterCRD(*namespace, extClientset)
 	if err != nil {
 		return err
 	}
 
-	err = backupschedulecrd.CreateBackupScheduleCRD(extClientset)
+	err = backupschedulecrd.CreateBackupScheduleCRD(*namespace, extClientset)
 	if err != nil {
 		return err
 	}
 
-	err = backupinstancecrd.CreateBackupInstanceCRD(extClientset)
+	err = backupinstancecrd.CreateBackupInstanceCRD(*namespace, extClientset)
 	if err != nil {
 		return err
 	}
 
-	return operator.CreateConfigMap(kubeClientset)
+	return operator.CreateConfigMap(*namespace, kubeClientset)
 }
