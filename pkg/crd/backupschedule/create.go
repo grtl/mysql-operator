@@ -14,8 +14,8 @@ const (
 )
 
 // CreateBackupScheduleCRD registers a MySQLBackupSchedule custom resource definition.
-func CreateBackupScheduleCRD(clientset apiextensions.Interface) error {
-	err := crd.RegisterCRD(clientset, definitionFilename)
+func CreateBackupScheduleCRD(namespace string, clientset apiextensions.Interface) error {
+	err := crd.RegisterCRD(namespace, clientset, definitionFilename)
 	if err != nil {
 		return err
 	}

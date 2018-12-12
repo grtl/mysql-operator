@@ -14,8 +14,8 @@ const (
 )
 
 // CreateClusterCRD registers a MySQLCluster custom resource in kubernetes api.
-func CreateClusterCRD(clientset apiextensions.Interface) error {
-	err := crd.RegisterCRD(clientset, definitionFilename)
+func CreateClusterCRD(namespace string, clientset apiextensions.Interface) error {
+	err := crd.RegisterCRD(namespace, clientset, definitionFilename)
 	if err != nil {
 		return err
 	}

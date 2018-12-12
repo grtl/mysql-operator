@@ -8,15 +8,16 @@ import (
 )
 
 // RegisterCRD registers given custom resource definition into the kubernetes api.
-func RegisterCRD(clientset apiextensions.Interface, filename string) error {
+func RegisterCRD(namespace string, clientset apiextensions.Interface, filename string) error {
 	crd := new(apiextensionsv1.CustomResourceDefinition)
 	err := util.ObjectFromFile(filename, crd)
 	if err != nil {
 		return err
 	}
 
-	crdInterface := clientset.ApiextensionsV1beta1().CustomResourceDefinitions()
+	crd.SetNamespace(namespace)
 
+	crdInterface := clientset.ApiextensionsV1beta1().CustomResourceDefinitions()
 	_, err = crdInterface.Create(crd)
 	if err != nil && apierrors.IsAlreadyExists(err) {
 		return nil

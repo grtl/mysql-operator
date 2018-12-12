@@ -14,8 +14,8 @@ const (
 )
 
 // CreateBackupInstanceCRD registers a MySQLBackupInstance custom resource definition.
-func CreateBackupInstanceCRD(clientset apiextensions.Interface) error {
-	err := crd.RegisterCRD(clientset, definitionFilename)
+func CreateBackupInstanceCRD(namespace string, clientset apiextensions.Interface) error {
+	err := crd.RegisterCRD(namespace, clientset, definitionFilename)
 	if err != nil {
 		return err
 	}
